@@ -1,0 +1,25 @@
+# Java build output
+target/
+build/
+out/
+*.class
+
+# Packaged artifacts
+*.jar
+*.war
+*.ear
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# IntelliJ IDEA local files
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/awsToolkit.xml
+.idea/dictionaries/
+.idea/shelf/
+
+# OS metadata
+.DS_Store
