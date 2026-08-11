@@ -1,5 +1,7 @@
-# Architecture Prompts
+# Architecture
 
-## Purpose
-
-Prompts for system design and tradeoff analysis.
+- Review layering
+- DDD
+- REST
+- Microservices
+- Scalability

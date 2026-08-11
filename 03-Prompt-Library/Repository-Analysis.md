@@ -1,5 +1,5 @@
-# Repository Analysis Prompts
+# Repository Analysis
 
-## Purpose
-
-Reusable prompts for understanding unfamiliar codebases.
+- Prefer derived queries for simple lookups.
+- Prefer JPQL for readability.
+- Use native SQL for reporting/performance/vendor features.

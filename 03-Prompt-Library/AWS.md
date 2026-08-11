@@ -1,5 +1,7 @@
-# AWS Prompts
+# AWS
 
-## Purpose
-
-Prompts for AWS architecture and services.
+- Read-only review
+- IAM
+- Networking
+- Cost
+- Terraform/CloudFormation plan

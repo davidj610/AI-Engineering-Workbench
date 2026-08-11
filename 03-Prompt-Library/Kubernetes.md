@@ -1,5 +1,7 @@
-# Kubernetes Prompts
+# Kubernetes
 
-## Purpose
-
-Prompts for deployments, services, ingress, and troubleshooting.
+- Manifests
+- Deployments
+- Services
+- HPA
+- Ingress

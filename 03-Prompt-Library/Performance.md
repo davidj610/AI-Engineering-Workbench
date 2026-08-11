@@ -1,5 +1,7 @@
-# Performance Prompts
+# Performance
 
-## Purpose
-
-Prompts for profiling and optimization.
+- SQL
+- JVM
+- Caching
+- Threading
+- Indexes

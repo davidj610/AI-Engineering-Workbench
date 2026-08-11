@@ -1,5 +1,3 @@
-# AI Workflow Prompts
+# AI Workflow
 
-## Purpose
-
-Prompts for integrating AI into daily engineering workflows.
+Analyze -> Plan -> Generate -> Compile -> Test -> Fix -> Re-test -> Explain -> Present diff

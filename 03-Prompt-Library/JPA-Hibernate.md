@@ -1,5 +1,8 @@
-# JPA & Hibernate Prompts
+# JPA/Hibernate
 
-## Purpose
-
-Prompts for ORM, mappings, fetch strategies, and performance.
+- Review mappings
+- Review fetch strategies
+- Identify N+1
+- Review cascades
+- Validate schema
+- Recommend indexes

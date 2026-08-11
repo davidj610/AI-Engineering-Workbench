@@ -1,5 +1,8 @@
-# Code Review Prompts
+# Code Reviews
 
-## Purpose
-
-Prompts for reviewing pull requests and code quality.
+- Review architecture
+- SOLID
+- Transactions
+- Performance
+- Security
+- Explain tradeoffs

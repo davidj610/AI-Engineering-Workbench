@@ -1,5 +1,7 @@
-# Production Incident Prompts
+# Production Incidents
 
-## Purpose
-
-Prompts for diagnosing and resolving production issues.
+- Root cause analysis
+- Logs
+- Metrics
+- Timeline
+- Remediation plan

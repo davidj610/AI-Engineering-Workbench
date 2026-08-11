@@ -1,5 +1,7 @@
-# Security Prompts
+# Security
 
-## Purpose
-
-Prompts for authentication, authorization, and secure coding.
+- Authentication
+- Authorization
+- JWT/OAuth
+- Secrets
+- OWASP

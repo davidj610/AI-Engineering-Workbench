@@ -1,5 +1,16 @@
-# Spring Boot Prompts
+# Spring Boot
 
-## Purpose
+## Scaffolding
+- Create Spring Boot 3.x Gradle Java 21 project.
+- Constructor injection.
+- Layered packages.
 
-Prompts for reviewing and building Spring Boot applications.
+## Database
+- Inspect datasource.
+- Reverse engineer schema.
+- Generate entities.
+- Generate repositories.
+- Generate DTOs (records).
+- Generate MapStruct mappers.
+- Generate services/controllers.
+- Compile, test, fix, explain.
