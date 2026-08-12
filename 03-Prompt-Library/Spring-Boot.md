@@ -1,2383 +1,2112 @@
-# Spring Boot Prompt Library
+# Spring Boot
 
-> **AI Engineering Workbench --- Version 1**
+> **AI Engineering Workbench — Version 1**
 
-This chapter contains reusable, production-oriented prompts for
-experienced engineers working with Java 21, Spring Boot 3.x, Gradle, and
-Jakarta APIs. Replace bracketed placeholders with repository-specific
-information before use.
+Production-quality, context-aware prompts for experienced engineers working with Java 21, Spring Boot 3.x, Gradle, and Jakarta APIs. Each prompt assumes the AI engineering agent already has access to the current repository, workspace, project, selected resource, build output, and other context available in the active engineering environment.
+
+---
 
 ## Project Creation
 
-### 1. Create a production Spring Boot service skeleton
+### 1. Create a production Spring Boot service
 
-**Purpose:** create a production Spring Boot service skeleton.
+**Purpose:** Create a production Spring Boot service.
 
-**When to use it:** Starting a new service that needs a maintainable
-baseline.
+**When to use it:** Starting a new production service or extracting a service from a larger system.
 
 **Complete prompt:**
 
-``` text
-Act as a senior Java platform engineer. Create a new production-grade Spring Boot 3.x service using Java 21 and Gradle.
+```text
+Act as a senior Java architect. Create the initial implementation for a production Spring Boot 3.x service using Java 21 and Gradle.
 
-Service name: [SERVICE_NAME]
-Business responsibility: [RESPONSIBILITY]
-Required integrations: [DATABASE / MESSAGING / EXTERNAL APIs / NONE]
+First inspect the existing repository and follow its conventions unless they conflict with the requirements below. Make incremental changes rather than replacing existing project structure unnecessarily.
 
 Requirements:
-- Use the latest compatible Spring Boot 3.x release unless the repository constrains the version.
-- Use Gradle and the Gradle Wrapper.
-- Use Java 21 toolchains.
-- Use package-by-feature unless there is a concrete reason not to.
-- Use constructor injection only.
-- Use Jakarta APIs; use Jakarta Persistence if persistence is required.
-- Include Actuator and a minimal health/readiness setup appropriate for production.
-- Configure tests with JUnit Jupiter.
-- Add only dependencies justified by the stated requirements.
-- Include .gitignore, application.yml, and a concise README with build/run/test commands.
-- Do not add speculative abstractions, interfaces, or infrastructure.
-- Explain important architectural decisions before implementing them.
-- Create the project incrementally, compile it, and run all tests after each meaningful step.
-- If a decision depends on missing information, state the assumption explicitly.
+- Use Java 21.
+- Use the repository's current Spring Boot 3.x line; do not upgrade versions unless necessary and explain any version change.
+- Use Gradle and preserve the existing Gradle DSL if one exists.
+- Prefer constructor injection.
+- Use Jakarta APIs, including Jakarta Persistence where persistence is required.
+- Establish clear package boundaries for API, application/service, domain, and infrastructure concerns without creating ceremonial layers that add no value.
+- Add only dependencies that are justified by an immediate requirement.
+- Externalize environment-specific configuration.
+- Include health/readiness support appropriate to the deployment environment.
+- Add a minimal test strategy: fast unit tests plus focused Spring integration tests where framework behavior matters.
+- Do not add Lombok unless the repository already uses it or there is a compelling project-specific reason.
+
+Before editing, summarize the proposed structure and important architectural decisions. Then implement the smallest coherent baseline. Compile the project and run the relevant tests. Fix failures caused by your changes.
 
 Return:
-1. Proposed package/module structure.
-2. Dependency rationale.
-3. Files created or changed.
-4. Implementation.
-5. Build and test results.
-6. Remaining production concerns.
+1. Files created or changed.
+2. Key architectural decisions and rationale.
+3. Build/test commands executed and results.
+4. Remaining production concerns or deliberate deferrals.
 ```
 
-**Expected AI output:** An idiomatic, compiling Spring Boot project with
-a small dependency footprint, clear structure, tests, and rationale.
+**Expected AI output:** A minimal, compiling service baseline with justified structure, tests, configuration, and a concise decision log.
 
-**Optional follow-up prompts:** -
-`Add PostgreSQL persistence without changing unrelated packages.` -
-`Add a Dockerfile and production JVM defaults, then run the test suite.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Do not let the AI generate unused layers merely
-because they are common in sample applications.
+- `Add the first vertical feature slice without changing the approved architecture.`
+- `Review the generated baseline for unnecessary framework or dependency complexity.`
 
-### 2. Modernize an existing Spring Boot project baseline
+**Notes or cautions:** Do not introduce speculative infrastructure, abstractions, or dependencies.
 
-**Purpose:** modernize an existing Spring Boot project baseline.
+---
 
-**When to use it:** An older service needs a controlled baseline upgrade
-before feature work.
+### 2. Add a feature as a vertical slice
+
+**Purpose:** Add a feature as a vertical slice.
+
+**When to use it:** Adding a new business capability to an established Spring Boot application.
 
 **Complete prompt:**
 
-``` text
-Review this existing Spring Boot repository and propose the smallest safe modernization path to Java 21 and Spring Boot 3.x.
+```text
+Implement the requested feature as a vertical slice in the current Spring Boot 3.x / Java 21 repository.
 
-Repository: [ATTACH OR PROVIDE REPOSITORY]
+Inspect the existing code first. Identify the relevant controller/API boundary, DTOs, application/service logic, domain behavior, persistence components, validation, exception mapping, and tests. Reuse established conventions where they are sound.
 
-Inspect before changing anything:
-- Current Java, Spring Boot, Gradle, plugin, and dependency versions.
-- javax.* usage that must migrate to jakarta.*.
-- Deprecated Spring APIs and configuration properties.
-- Test framework compatibility.
-- Build plugins, annotation processors, generated sources, and CI assumptions.
-- Runtime/container constraints.
+Constraints:
+- Make the smallest set of cohesive changes needed for the feature.
+- Prefer constructor injection.
+- Keep HTTP concerns out of domain/application logic.
+- Do not expose JPA entities directly through the API unless the project explicitly standardizes on that approach and the tradeoff is justified.
+- Use Jakarta validation and Jakarta Persistence where applicable.
+- Define transaction boundaries at the service/use-case level rather than scattering transactions through controllers and repositories.
+- Preserve backward compatibility unless the requested behavior explicitly changes the contract.
+- Avoid new abstractions that have only one trivial implementation.
+- Add or update unit and integration tests for meaningful behavior and boundary conditions.
 
-First produce a migration plan grouped into:
-A. Required compatibility changes.
-B. Recommended maintainability changes.
-C. Optional improvements that should NOT block the migration.
-
-Do not modify code until the plan is presented. Then implement only group A unless I approve more.
-Keep changes incremental and reviewable. Preserve behavior. Do not combine architectural refactoring with framework migration.
-After each stage, run ./gradlew clean test and any existing integration-test task. Diagnose failures rather than suppressing tests.
-For every dependency/version change, explain why it is required.
+Before modifying code, state the implementation plan and any assumptions. After implementation, compile and run the relevant tests. Report changed files, behavior added, design choices, and any unresolved risks.
 ```
 
-**Expected AI output:** A risk-ranked migration plan followed by a
-minimal, test-verified Java 21/Spring Boot 3.x upgrade.
+**Expected AI output:** A focused feature implementation spanning only the layers required, with tests and rationale.
 
-**Optional follow-up prompts:** -
-`Now implement only the required compatibility changes.` -
-`Review the completed migration for accidental behavioral changes.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Framework migration and architecture redesign
-should normally be separate changesets.
+- `Add negative-path and concurrency tests for this feature.`
+- `Review the feature for API compatibility and transaction-boundary risks.`
+
+**Notes or cautions:** Prefer a complete thin slice over partially building several layers.
+
+---
 
 ## Gradle
 
-### 3. Audit a Spring Boot Gradle build
+### 3. Audit and simplify the Gradle build
 
-**Purpose:** audit a Spring Boot Gradle build.
+**Purpose:** Audit and simplify the Gradle build.
 
-**When to use it:** A build.gradle or build.gradle.kts has accumulated
-plugins, dependencies, and custom tasks.
-
-**Complete prompt:**
-
-``` text
-Review the Gradle build for this Java 21 / Spring Boot 3.x service as a senior build engineer.
-
-Build files: [PASTE OR ATTACH]
-
-Evaluate:
-- Plugin versions and whether Spring Boot dependency management is being used correctly.
-- Java 21 toolchain configuration.
-- Redundant, unused, duplicated, or incorrectly scoped dependencies.
-- api vs implementation vs compileOnly vs annotationProcessor vs runtimeOnly vs testImplementation.
-- Reproducibility and dependency locking/version catalogs if appropriate.
-- Test task configuration and JUnit Platform usage.
-- Custom tasks that duplicate standard Gradle/Spring Boot behavior.
-- Wrapper version and CI compatibility.
-- Build performance issues that are visible from configuration.
-
-Do not rewrite the build initially. Produce a prioritized findings table with severity, evidence, and exact recommendation.
-Then propose the smallest patch for high-value issues only.
-Do not introduce a version catalog, convention plugin, or multi-project structure unless the repository complexity justifies it.
-After approved changes, run ./gradlew clean test and report the exact result.
-```
-
-**Expected AI output:** A focused build audit and minimal patch that
-improves correctness, maintainability, and reproducibility.
-
-**Optional follow-up prompts:** -
-`Check the dependency graph for conflicting versions.` -
-`Explain which dependencies can move to runtimeOnly or testImplementation.`
-
-**Notes / cautions:** Build-file cleverness is usually a maintenance
-cost; prefer standard Gradle conventions.
-
-### 4. Diagnose Gradle dependency conflicts
-
-**Purpose:** diagnose Gradle dependency conflicts.
-
-**When to use it:** The service has classpath errors, NoSuchMethodError,
-version drift, or unexplained transitive dependencies.
+**When to use it:** When a Spring Boot build has accumulated plugins, dependencies, custom tasks, or inconsistent configuration.
 
 **Complete prompt:**
 
-``` text
-Diagnose this Spring Boot 3.x Gradle dependency problem without guessing.
+```text
+Review the current Gradle build as a senior Java build engineer. The project uses Java 21 and Spring Boot 3.x.
 
-Symptoms:
-[PASTE ERROR / STACK TRACE]
+Analyze all Gradle build files, settings, version catalogs, convention plugins, wrapper configuration, and relevant CI build commands. Identify:
+- unused or redundant plugins;
+- dependencies declared in the wrong configuration;
+- version overrides that fight Spring Boot dependency management;
+- duplicated repository or compiler configuration;
+- non-reproducible dependency declarations;
+- tasks that bypass normal lifecycle behavior;
+- configuration-cache or build-cache blockers where relevant;
+- test task configuration that can be simplified;
+- Java toolchain inconsistencies;
+- dependency constraints that are unexplained or obsolete.
 
-Relevant build files:
-[PASTE OR ATTACH]
+Do not modify files initially. Produce a prioritized set of recommendations with rationale, risk, and expected benefit. Separate safe cleanup from changes that could alter runtime behavior.
 
-Use Gradle dependencyInsight/dependencies tasks where useful. Determine:
-1. Which dependency introduces the conflicting artifact.
-2. Which version Spring Boot's dependency management expects.
-3. Whether an explicit version is overriding the managed version.
-4. Whether exclusion, alignment, a constraint, or removal is the correct fix.
-5. Whether the conflict is compile-time, test-time, or runtime.
-
-Prefer removing unnecessary explicit versions over forcing versions.
-Do not globally exclude a transitive dependency unless you can explain why that is safe.
-Make the smallest change that restores a coherent dependency graph.
-Run clean tests after the change and show the relevant dependencyInsight result proving the resolution.
+After I approve recommendations, apply them incrementally, run `./gradlew clean build`, and fix only failures caused by the approved changes.
 ```
 
-**Expected AI output:** A root-cause dependency analysis backed by
-Gradle output and a minimal verified fix.
+**Expected AI output:** A build audit that distinguishes safe cleanup from behavior-changing changes and provides an incremental remediation plan.
 
-**Optional follow-up prompts:** -
-`Check whether any other explicitly versioned Spring ecosystem libraries should be unpinned.` -
-`Add a dependency constraint only if removal of the override is insufficient.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Do not treat dependency forcing as the default
-solution.
+- `Apply only the safe cleanup items.`
+- `Show why each explicitly versioned dependency is or is not necessary.`
+
+**Notes or cautions:** Do not upgrade dependencies merely because newer versions exist.
+
+---
+
+### 4. Diagnose a Gradle dependency conflict
+
+**Purpose:** Diagnose a Gradle dependency conflict.
+
+**When to use it:** When compilation, startup, or tests fail because incompatible library versions are being resolved.
+
+**Complete prompt:**
+
+```text
+Diagnose the dependency/version conflict in this Spring Boot 3.x Gradle project.
+
+Use the repository and Gradle's dependency-insight capabilities to determine the actual resolved dependency graph. Do not guess from `build.gradle` declarations alone.
+
+Work methodically:
+1. Identify the failing class, method, package, or linkage error.
+2. Determine which dependency supplies it at compile time and runtime.
+3. Run appropriate Gradle reports such as `dependencies` and `dependencyInsight`.
+4. Identify which direct or transitive dependency introduced the incompatible version.
+5. Check whether Spring Boot's dependency management already defines a compatible version.
+6. Recommend the least invasive fix: remove an unnecessary override, exclude a transitive dependency only when justified, align a platform/BOM, or upgrade a direct dependency if required.
+7. Explain why the fix is safe and what could regress.
+
+Make the minimal approved change, then run the narrow failing task and `./gradlew clean build`. Report the resolved versions before and after.
+```
+
+**Expected AI output:** A root-cause dependency analysis backed by Gradle resolution data and a minimal verified fix.
+
+**Optional follow-up prompts:**
+
+- `Show the exact dependency path that introduced the conflicting artifact.`
+- `Check whether this conflict also affects testRuntimeClasspath.`
+
+**Notes or cautions:** Prefer dependency alignment over broad exclusions.
+
+---
 
 ## Configuration
 
-### 5. Design type-safe application configuration
+### 5. Review application configuration
 
-**Purpose:** design type-safe application configuration.
+**Purpose:** Review application configuration.
 
-**When to use it:** A service has a growing set of related configuration
-properties.
+**When to use it:** When configuration has grown across YAML/properties, environment variables, and code.
 
 **Complete prompt:**
 
-``` text
-Refactor the following Spring Boot configuration into type-safe, maintainable configuration properties.
+```text
+Review configuration management in the current Spring Boot 3.x application.
 
-Current configuration/code:
-[PASTE application.yml AND RELATED CODE]
+Inspect `application.yml`/`application.properties`, profile-specific files, `@ConfigurationProperties` classes, environment-variable usage, secret references, and deployment configuration that is present in the workspace.
 
-Use Spring Boot 3.x and Java 21.
+Evaluate:
+- type-safe configuration versus scattered `@Value`;
+- naming and grouping of properties;
+- defaults that are safe for production;
+- validation of required properties;
+- duplication across profiles;
+- secrets accidentally committed or logged;
+- environment-specific values embedded in code;
+- ambiguous precedence between files, environment variables, and command-line arguments;
+- configuration that should be owned by infrastructure rather than application code.
+
+Do not edit first. Produce a concrete refactoring plan that preserves behavior. For each proposed property move or rename, identify compatibility implications.
+
+After approval, refactor incrementally using immutable or constructor-bound `@ConfigurationProperties` patterns appropriate to the current Spring Boot version. Add tests for configuration binding/validation where valuable. Compile and run tests.
+```
+
+**Expected AI output:** A configuration audit and a low-risk migration toward cohesive, validated, type-safe configuration.
+
+**Optional follow-up prompts:**
+
+- `Convert the highest-risk `@Value` group to `@ConfigurationProperties`.`
+- `Identify every configuration value that could expose a secret.`
+
+**Notes or cautions:** Property renames can break deployment manifests even when application tests pass.
+
+---
+
+### 6. Introduce validated configuration properties
+
+**Purpose:** Introduce validated configuration properties.
+
+**When to use it:** When several related external settings need a maintainable type-safe representation.
+
+**Complete prompt:**
+
+```text
+Create a type-safe Spring Boot configuration model for the related settings already used by this feature.
+
+Inspect existing property names and consumers before changing anything. Use Spring Boot 3.x conventions and Java 21. Prefer a cohesive `@ConfigurationProperties` type over multiple `@Value` fields.
+
 Requirements:
-- Prefer @ConfigurationProperties over scattered @Value fields.
-- Group properties around a cohesive external concern.
-- Use immutable configuration where practical.
-- Validate required values with Jakarta Validation.
-- Preserve Spring Boot relaxed binding conventions.
-- Do not expose secrets through toString(), logs, Actuator, or error messages.
-- Distinguish required settings from settings with defensible defaults.
-- Keep environment-specific values outside code.
+- Keep the property prefix stable unless there is a strong reason to change it.
+- Model required versus optional values explicitly.
+- Use Jakarta Bean Validation for invalid or missing startup configuration where failure-fast behavior is appropriate.
+- Use domain-appropriate Java types such as `Duration`, `DataSize`, URI, enums, or records where they improve correctness.
+- Avoid embedding secrets in defaults.
+- Update consumers to use constructor injection.
+- Add focused binding/validation tests.
+- Preserve deployment compatibility or clearly document any required configuration migration.
 
-First show the proposed property namespace and Java type. Explain why the grouping is cohesive.
-Then implement the smallest refactor and update tests.
-Run ./gradlew test and report binding/validation coverage.
+Implement incrementally, compile, and run the relevant tests. Explain why each property belongs in this configuration group.
 ```
 
-**Expected AI output:** Validated, type-safe configuration with a clear
-namespace and tests.
+**Expected AI output:** A cohesive configuration-properties model with validated binding, updated consumers, and tests.
 
-**Optional follow-up prompts:** -
-`Add a configuration binding test for missing required values.` -
-`Review which defaults are safe versus dangerous in production.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** A default that hides missing production
-configuration can be worse than failing fast.
+- `Add metadata/documentation for these configuration properties.`
+- `Review which defaults should be removed for production safety.`
 
-### 6. Review application.yml for production safety
+**Notes or cautions:** Do not turn every single property into a separate configuration class.
 
-**Purpose:** review application.yml for production safety.
-
-**When to use it:** Before deployment, configuration needs a focused
-safety and maintainability review.
-
-**Complete prompt:**
-
-``` text
-Review this Spring Boot 3.x application.yml/application.properties as if it were going to production.
-
-Configuration:
-[PASTE OR ATTACH]
-
-Check specifically for:
-- Embedded credentials, tokens, private URLs, or other secrets.
-- Dangerous defaults.
-- Environment-specific values committed to source.
-- Incorrect property names or obsolete Spring Boot properties.
-- Logging settings that could leak sensitive data.
-- Database pool and timeout settings.
-- HTTP/server timeout and graceful shutdown settings.
-- Actuator exposure.
-- JPA/Hibernate DDL behavior.
-- Profile activation mistakes.
-- Placeholder syntax and missing-value behavior.
-
-Classify findings as Critical, High, Medium, or Low.
-For each finding include the exact property, risk, and recommended replacement.
-Do not invent values when workload information is missing; identify what must be measured.
-Provide a minimal corrected configuration only after the review.
-```
-
-**Expected AI output:** A production-focused configuration audit with a
-minimal corrected example.
-
-**Optional follow-up prompts:** -
-`Separate environment-neutral defaults from deployment-supplied values.` -
-`Review the Kubernetes/EC2 environment variables that map to these properties.`
-
-**Notes / cautions:** Configuration values such as pool sizes and
-timeouts should be workload-driven, not copied from generic examples.
+---
 
 ## Profiles
 
-### 7. Simplify Spring profile usage
+### 7. Reduce Spring profile complexity
 
-**Purpose:** simplify Spring profile usage.
+**Purpose:** Reduce Spring profile complexity.
 
-**When to use it:** Profile-specific beans and YAML files have become
-hard to reason about.
-
-**Complete prompt:**
-
-``` text
-Review the use of Spring profiles in this Spring Boot 3.x service.
-
-Inputs:
-[PASTE PROFILE ANNOTATIONS, application-*.yml FILES, AND RELEVANT BEANS]
-
-Identify:
-- Profiles representing deployment environments versus actual behavioral modes.
-- Beans whose selection would be clearer through explicit configuration properties.
-- Profile expressions that are difficult to test or reason about.
-- Duplicate configuration across profile files.
-- Tests that depend accidentally on developer-local profiles.
-
-Recommend a simpler model that minimizes profile-specific code.
-Prefer configuration properties and externalized values when environment differences are data, not behavior.
-Do not remove a profile when it legitimately selects a different implementation.
-Show the migration incrementally and include tests proving bean selection for each supported mode.
-Run the test suite after changes.
-```
-
-**Expected AI output:** A simplified profile strategy with explicit
-bean-selection tests.
-
-**Optional follow-up prompts:** -
-`Replace the selected profile with a property-driven conditional bean.` -
-`Create tests that prove no ambiguous bean configuration is possible.`
-
-**Notes / cautions:** Profiles are useful, but environment names
-scattered through code create hidden coupling.
-
-### 8. Create safe local/test/production configuration separation
-
-**Purpose:** create safe local/test/production configuration separation.
-
-**When to use it:** A new service needs clear environment separation
-without duplicating entire configuration files.
+**When to use it:** When many profiles contain overlapping beans or configuration and behavior is hard to reason about.
 
 **Complete prompt:**
 
-``` text
-Design the configuration/profile strategy for a Spring Boot 3.x service with local development, automated tests, and production deployment.
+```text
+Audit Spring profile usage in this repository and reduce unnecessary profile-driven branching.
 
-Constraints:
-[DESCRIBE DATABASE, EXTERNAL SERVICES, SECRET STORE, DEPLOYMENT PLATFORM]
+Inspect `@Profile`, profile-specific configuration files, test profiles, deployment manifests, and conditional bean definitions. Build a map of what each profile changes.
 
-Produce:
-- A small environment-neutral application.yml.
-- Only the profile-specific files that are genuinely needed.
-- A rule for which values come from environment variables or secret management.
-- Test configuration that is deterministic and does not depend on a developer machine.
-- A strategy for local substitutes such as Testcontainers or local endpoints.
+Evaluate whether each use is truly an environment distinction or whether it would be better represented by:
+- external configuration;
+- feature flags;
+- `@ConditionalOnProperty`;
+- explicit test configuration;
+- infrastructure-specific adapters selected by configuration.
 
-Do not put production secrets or production hostnames in source control.
-Do not create profile-specific Java classes unless behavior actually differs.
-Explain precedence and activation so another engineer can predict which value wins.
-Include a test approach for configuration binding and critical bean selection.
+Do not modify code first. Identify profile combinations that are ambiguous, mutually exclusive, or difficult to test. Recommend a simpler model that keeps production behavior explicit.
+
+After approval, make incremental changes and add tests that prove bean selection/configuration for the important cases. Run the relevant Spring context tests and the full build.
 ```
 
-**Expected AI output:** A minimal profile/configuration scheme that is
-predictable across local, test, and production environments.
+**Expected AI output:** A profile map, simplification recommendations, and verified reduction of environment-coupled behavior.
 
-**Optional follow-up prompts:** -
-`Adapt this design for Kubernetes ConfigMaps and Secrets.` -
-`Add Testcontainers-based integration-test configuration.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Keep the number of profiles small; deployment
-platforms already provide an environment/configuration layer.
+- `Replace only the most problematic profile with property-based conditional configuration.`
+- `List all tests whose behavior depends on an active profile.`
+
+**Notes or cautions:** Profiles are useful, but using them as a general-purpose feature-toggle system creates hidden combinations.
+
+---
+
+### 8. Create a safe local-development profile
+
+**Purpose:** Create a safe local-development profile.
+
+**When to use it:** When developers need local defaults without weakening production configuration.
+
+**Complete prompt:**
+
+```text
+Create or improve the local-development configuration for this Spring Boot application without making production defaults less safe.
+
+Inspect the existing configuration and deployment assumptions. Add only local conveniences that are clearly isolated from production.
+
+Requirements:
+- Never commit real credentials.
+- Keep production-safe defaults in the base configuration.
+- Put local-only endpoints, ports, logging verbosity, or emulator settings in an explicit local configuration.
+- Prefer environment variables for developer-specific secrets.
+- Do not silently substitute insecure authentication/authorization behavior unless the project explicitly requires a local stub and it is strongly isolated.
+- Ensure tests do not accidentally depend on the local profile.
+- Document the exact activation mechanism in the repository's existing developer documentation if appropriate.
+
+Validate startup/configuration binding and run tests. Explain which settings are local-only and why.
+```
+
+**Expected AI output:** A clearly isolated local profile that improves developer experience without contaminating production behavior.
+
+**Optional follow-up prompts:**
+
+- `Check whether Docker Compose or Testcontainers can eliminate some local-only configuration.`
+- `Review the local profile for accidental security bypasses.`
+
+**Notes or cautions:** Never make `local` the implicit production fallback.
+
+---
 
 ## Dependency Management
 
-### 9. Review dependencies for necessity and risk
+### 9. Review Spring Boot dependencies
 
-**Purpose:** review dependencies for necessity and risk.
+**Purpose:** Review Spring Boot dependencies.
 
-**When to use it:** A service needs dependency hygiene before release or
-upgrade.
-
-**Complete prompt:**
-
-``` text
-Perform a dependency hygiene review of this Spring Boot 3.x / Java 21 Gradle project.
-
-Inputs:
-[ATTACH build files AND, IF AVAILABLE, ./gradlew dependencies OUTPUT]
-
-For each direct dependency determine:
-- What production or test capability requires it.
-- Whether Spring Boot already provides/manages an alternative.
-- Whether the scope is correct.
-- Whether it appears unused or duplicated.
-- Whether an explicit version should be removed in favor of Boot dependency management.
-- Whether it materially expands runtime/security surface.
-
-Do not remove a dependency solely because static inspection cannot find direct imports; account for reflection, starters, JDBC drivers, logging providers, annotation processors, and runtime integrations.
-Return a keep/remove/change-scope/unpin recommendation with rationale.
-Then propose a minimal patch and run clean tests after approved changes.
-```
-
-**Expected AI output:** A defensible dependency inventory and a low-risk
-cleanup patch.
-
-**Optional follow-up prompts:** -
-`Inspect transitive dependencies introduced by the largest starters.` -
-`Identify dependencies that are only required in tests.`
-
-**Notes / cautions:** Runtime frameworks often use dependencies
-indirectly; validate before removing them.
-
-### 10. Choose between Spring starters and individual dependencies
-
-**Purpose:** choose between Spring starters and individual dependencies.
-
-**When to use it:** Engineers are deciding whether a starter is too
-broad for a service.
+**When to use it:** When dependencies need a security, maintainability, or scope audit.
 
 **Complete prompt:**
 
-``` text
-Evaluate whether this Spring Boot service should use the following starter or replace it with narrower dependencies.
+```text
+Audit the dependencies of this Spring Boot 3.x / Java 21 Gradle project.
 
-Starter/dependencies: [NAME]
-Use case: [WHAT THE SERVICE ACTUALLY NEEDS]
-Current build: [PASTE RELEVANT DEPENDENCIES]
+Inspect direct and transitive dependencies and classify them by purpose. For each direct dependency, determine:
+- whether it is actually used;
+- whether Spring Boot already manages its version;
+- whether its Gradle configuration is appropriate (`implementation`, `runtimeOnly`, `testImplementation`, etc.);
+- whether a smaller starter or library would reduce unnecessary surface area;
+- whether it duplicates another library's responsibility;
+- whether it creates Jakarta/Javax compatibility risk;
+- whether it has known project-specific upgrade constraints visible in the repository.
 
-Analyze:
-- What the starter contributes directly and transitively.
-- Which auto-configurations are relevant.
-- Operational/security surface added.
-- Version-management benefits.
-- Maintenance cost of manually assembling equivalent dependencies.
-- Whether exclusions would make the build more fragile.
+Do not upgrade or remove anything initially. Produce a prioritized table of recommendations with evidence from source usage and the resolved dependency graph.
 
-Recommend the simplest maintainable choice. Do not optimize for the fewest JARs unless there is a measurable reason.
-If recommending a change, provide the exact Gradle patch and verification commands.
-Run tests after implementation.
+After approval, apply changes in small batches and run `./gradlew clean build` after each meaningful batch.
 ```
 
-**Expected AI output:** A concrete starter-versus-manual dependency
-decision with tradeoffs and build changes.
+**Expected AI output:** A dependency inventory with evidence-based keep/remove/align recommendations.
 
-**Optional follow-up prompts:** -
-`Show which auto-configurations become active because of this starter.` -
-`Check startup condition reports for unwanted auto-configuration.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Removing starters can trade a small classpath
-reduction for long-term dependency-management burden.
+- `Remove only dependencies proven unused and verify the build.`
+- `Find explicit versions that should defer to Spring Boot dependency management.`
+
+**Notes or cautions:** Static usage searches can miss reflective/framework usage; verify before removal.
+
+---
+
+### 10. Migrate from javax to Jakarta dependencies
+
+**Purpose:** Migrate from javax to Jakarta dependencies.
+
+**When to use it:** When upgrading or repairing a Spring Boot 3.x codebase that still contains legacy Java EE dependencies.
+
+**Complete prompt:**
+
+```text
+Find and remediate legacy `javax.*` API dependencies and imports that are incompatible or unnecessary in this Spring Boot 3.x application.
+
+First inventory all `javax.*` imports, Gradle dependencies, generated sources, configuration, persistence mappings, validation annotations, servlet APIs, and third-party integrations.
+
+Classify each occurrence:
+- must migrate to `jakarta.*`;
+- legitimately remains `javax.*` because it is a Java SE API such as `javax.crypto`;
+- generated/vendor code that should not be edited directly;
+- third-party library incompatibility requiring a dependency upgrade or adapter.
+
+Do not perform blind search-and-replace. Propose the migration in dependency-safe increments. Then make approved changes, compile after each logical group, and run tests.
+
+Report any library that prevents a complete Spring Boot 3.x/Jakarta migration and recommend the least disruptive resolution.
+```
+
+**Expected AI output:** A precise Jakarta migration that avoids incorrectly replacing valid Java SE `javax` packages.
+
+**Optional follow-up prompts:**
+
+- `Migrate only persistence and validation APIs first.`
+- `Identify third-party libraries still tied to Java EE namespaces.`
+
+**Notes or cautions:** Not every `javax` package was renamed to `jakarta`.
+
+---
 
 ## Database Reverse Engineering
 
-### 11. Reverse-engineer a schema into a persistence model plan
+### 11. Reverse engineer an existing schema
 
-**Purpose:** reverse-engineer a schema into a persistence model plan.
+**Purpose:** Reverse engineer an existing schema.
 
-**When to use it:** Integrating a Spring Boot service with an existing
-relational schema.
-
-**Complete prompt:**
-
-``` text
-Analyze this existing database schema and design a Jakarta Persistence model for Spring Boot 3.x without generating code yet.
-
-Schema/DDL:
-[PASTE DDL OR SCHEMA DESCRIPTION]
-
-For each table identify:
-- Candidate entity and aggregate ownership.
-- Primary key strategy, including composite keys.
-- Foreign-key relationships and likely cardinality.
-- Nullability and database constraints that must remain authoritative.
-- Columns that should map to enums, value types, timestamps, JSON, or remain scalar.
-- Legacy naming that should be mapped explicitly rather than copied into Java names.
-- Tables that are lookup/reference data, join tables, audit/history tables, or not appropriate as entities.
-
-Flag ambiguous relationships and ask targeted questions rather than guessing.
-Avoid bidirectional JPA relationships by default; justify any you recommend.
-Do not infer cascade or orphanRemoval merely from foreign keys.
-Return a mapping plan, risk list, and proposed entity names only.
-```
-
-**Expected AI output:** A careful schema-to-domain mapping plan that
-avoids automatic JPA modeling mistakes.
-
-**Optional follow-up prompts:** -
-`Generate only the first aggregate's entities from the approved mapping.` -
-`Identify queries that may require dedicated read models instead of entity traversal.`
-
-**Notes / cautions:** Database structure does not automatically reveal
-domain ownership or transaction boundaries.
-
-### 12. Compare legacy schema constraints with JPA mappings
-
-**Purpose:** compare legacy schema constraints with JPA mappings.
-
-**When to use it:** Existing entities may disagree with the actual
-database.
+**When to use it:** When building a Spring Boot persistence layer against a pre-existing relational schema.
 
 **Complete prompt:**
 
-``` text
-Compare these Jakarta Persistence entities with the authoritative database DDL.
+```text
+Reverse engineer the database model represented by the schema/migrations available in this workspace into a maintainable Spring Boot 3.x persistence design.
 
-Entities:
-[PASTE OR ATTACH]
+Do not mechanically create one JPA entity per table before understanding the schema. First analyze:
+- primary and foreign keys;
+- unique constraints;
+- nullability;
+- indexes;
+- lookup/reference tables;
+- join tables;
+- inheritance-like patterns;
+- audit columns;
+- optimistic-lock candidates;
+- database-generated values;
+- views, triggers, and stored procedures that affect application behavior.
 
-DDL:
-[PASTE OR ATTACH]
+Produce a proposed entity/aggregate mapping and explicitly call out tables that should not become normal mutable entities.
 
-Find mismatches in:
-- Table/column names.
-- Length, precision, scale, nullability.
-- Primary and foreign keys.
-- Unique constraints.
-- Enum/string mappings.
-- Temporal types.
-- Generated/identity/sequence behavior.
-- Relationship optionality.
-- Index assumptions relevant to known queries.
+Use Jakarta Persistence. Avoid unnecessary bidirectional relationships. Prefer explicit fetch behavior and avoid `EAGER` collections. Preserve database constraints rather than relying only on application validation.
 
-Do not treat Hibernate schema generation as authoritative.
-Classify mismatches into correctness risk, data-loss risk, performance risk, and cosmetic differences.
-Propose the smallest entity changes required to match the database.
-Do not enable ddl-auto=update as a fix.
-Add mapping/integration tests where they can catch future drift.
+After approval, generate mappings incrementally, add focused persistence tests against a realistic database via the project's established integration-test approach, and run the build.
 ```
 
-**Expected AI output:** A precise entity-versus-DDL drift report and
-safe mapping corrections.
+**Expected AI output:** A schema-informed persistence model rather than a naïve table-to-class translation.
 
-**Optional follow-up prompts:** -
-`Create a Testcontainers integration test for the highest-risk mapping.` -
-`Review Flyway/Liquibase migrations for the same drift.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Production schemas should be changed through
-controlled migrations, not Hibernate auto-update.
+- `Generate mappings for one aggregate first and validate SQL behavior.`
+- `Identify schema constraints that should also be represented in application validation.`
+
+**Notes or cautions:** Database semantics such as triggers and generated columns must be understood before ORM writes are enabled.
+
+---
+
+### 12. Assess a legacy schema before JPA mapping
+
+**Purpose:** Assess a legacy schema before JPA mapping.
+
+**When to use it:** When deciding whether a legacy database is suitable for direct ORM mapping.
+
+**Complete prompt:**
+
+```text
+Assess whether the legacy relational schema in this workspace is safe and practical to map with Jakarta Persistence.
+
+Do not generate entities yet. Analyze the schema for ORM hazards:
+- tables without stable primary keys;
+- composite keys;
+- nullable or inconsistent foreign keys;
+- trigger-managed columns;
+- shared tables written by other applications;
+- denormalized structures;
+- polymorphic relationships;
+- stored-procedure-centric workflows;
+- optimistic locking feasibility;
+- very large collections;
+- database-specific data types;
+- read-only views.
+
+For each hazard, recommend one of: normal JPA mapping, read-only mapping, native SQL/JdbcClient, stored-procedure integration, adapter layer, schema change, or deliberate non-mapping.
+
+Explain tradeoffs in maintainability, correctness, transaction behavior, and performance. Return a prioritized mapping strategy before any code changes.
+```
+
+**Expected AI output:** A go/no-go mapping assessment with per-table integration strategies.
+
+**Optional follow-up prompts:**
+
+- `Design the persistence approach for the highest-risk table.`
+- `Identify where JPA would hide important database behavior.`
+
+**Notes or cautions:** Using JPA everywhere is not a goal; choose the persistence mechanism that makes behavior clearest.
+
+---
 
 ## Entity Generation
 
-### 13. Generate entities from approved mappings
+### 13. Generate a JPA entity from an approved table
 
-**Purpose:** generate entities from approved mappings.
+**Purpose:** Generate a JPA entity from an approved table.
 
-**When to use it:** A schema mapping plan is approved and entities need
-implementation.
-
-**Complete prompt:**
-
-``` text
-Generate Jakarta Persistence entities for the approved mapping below.
-
-Approved mapping:
-[PASTE MAPPING PLAN / DDL]
-
-Technical requirements:
-- Java 21, Spring Boot 3.x, jakarta.persistence imports.
-- Explicit imports; no wildcard imports.
-- Use explicit @Table/@Column names where database naming differs from Java naming.
-- Choose equals/hashCode semantics deliberately and explain them.
-- Avoid Lombok @Data on entities.
-- Prefer LAZY relationships where JPA permits and avoid unnecessary relationships.
-- Do not add cascade, orphanRemoval, bidirectional associations, or eager fetching without a stated lifecycle reason.
-- Preserve database nullability, length, precision, and key generation.
-- Use @Version only if optimistic locking is an intentional requirement.
-- Keep business validation separate from database mapping unless it is truly the same invariant.
-
-Generate one aggregate at a time. Compile and run tests before continuing to the next aggregate.
-```
-
-**Expected AI output:** Conservative, explicit JPA entities that match
-the approved schema and compile cleanly.
-
-**Optional follow-up prompts:** -
-`Generate mapping tests for these entities.` -
-`Review the generated entities for accidental N+1 traversal paths.`
-
-**Notes / cautions:** Entity generation should follow an approved
-mapping; it should not invent domain relationships.
-
-### 14. Review JPA entity design
-
-**Purpose:** review JPA entity design.
-
-**When to use it:** Entities exist but need senior-level persistence
-review.
+**When to use it:** When a table has already been analyzed and needs a production-quality entity mapping.
 
 **Complete prompt:**
 
-``` text
-Review these Jakarta Persistence entities as a senior Spring/JPA engineer.
+```text
+Generate a Jakarta Persistence entity for the approved table using the schema and repository conventions already present.
 
-Entities:
-[PASTE OR ATTACH]
+Requirements:
+- Java 21 and Spring Boot 3.x.
+- Use `jakarta.persistence` imports.
+- Map identifiers and generation strategy to actual database behavior.
+- Preserve nullability, length, precision/scale, uniqueness, and column names where mapping is not implicit.
+- Use appropriate Java temporal and numeric types.
+- Add `@Version` only if the schema and update model support optimistic locking.
+- Default relationships to the least surprising fetch behavior; never make collections eager.
+- Avoid bidirectional relationships unless navigation is genuinely required in both directions.
+- Do not put API serialization annotations on the entity unless the architecture explicitly exposes entities.
+- Implement equality/hash semantics safely for the chosen identifier lifecycle; explain the decision.
+- Do not add setters indiscriminately if domain invariants require controlled mutation.
 
-Evaluate:
-- Identity and equals/hashCode correctness.
-- Relationship ownership and cardinality.
-- Fetch strategy and N+1 risk.
-- Cascades and orphan removal.
-- Aggregate boundaries and whether relationships cross them unnecessarily.
-- Mutable collections and invariant protection.
-- Optimistic locking needs.
-- Column mappings, temporal types, enums, precision, and nullability.
-- Serialization hazards and accidental REST exposure.
-- Whether any entity should instead be a value object or read projection.
-
-Do not refactor immediately. Produce findings ranked by correctness, performance, and maintainability.
-For each recommendation explain the concrete failure mode it prevents.
-After approval, change one concern at a time and run tests.
+Add a focused persistence test that proves the important mapping. Compile and run tests. Report generated SQL concerns such as unexpected joins or extra selects.
 ```
 
-**Expected AI output:** A prioritized entity-design review tied to
-concrete JPA failure modes.
+**Expected AI output:** A schema-faithful entity plus a persistence test and explanation of identity/relationship choices.
 
-**Optional follow-up prompts:** -
-`Implement only the high-severity mapping corrections.` -
-`Design repository queries that avoid traversing the risky relationships.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** JPA entity graphs should model persistence needs
-without becoming an unrestricted object graph.
+- `Add the related entity mapping without creating a bidirectional association unless necessary.`
+- `Review this entity for unsafe equality/hashCode behavior.`
+
+**Notes or cautions:** Entity generation should follow an approved schema analysis, not infer missing constraints.
+
+---
+
+### 14. Review JPA entity relationships
+
+**Purpose:** Review JPA entity relationships.
+
+**When to use it:** When an entity graph has become complex or is causing serialization/performance problems.
+
+**Complete prompt:**
+
+```text
+Review all JPA relationships in the selected entity area as a persistence specialist.
+
+For every `@OneToOne`, `@OneToMany`, `@ManyToOne`, and `@ManyToMany`, evaluate:
+- whether the relationship is required in the object model;
+- owning side correctness;
+- cascade semantics;
+- orphan removal;
+- fetch behavior;
+- collection type;
+- bidirectional synchronization;
+- lifecycle coupling;
+- potential N+1 queries;
+- serialization hazards;
+- equality/hashCode interaction;
+- aggregate-boundary implications.
+
+Do not modify mappings initially. Recommend the smallest set of changes that improves correctness and query behavior. Include likely SQL consequences.
+
+After approval, apply changes incrementally and add persistence tests that exercise load, insert/update, and deletion semantics relevant to the relationship. Run the tests and inspect query behavior where tooling permits.
+```
+
+**Expected AI output:** A relationship-by-relationship review with ORM and aggregate-lifecycle rationale.
+
+**Optional follow-up prompts:**
+
+- `Fix only unsafe cascade/orphan-removal settings.`
+- `Design a query that loads the required graph without changing default fetch types.`
+
+**Notes or cautions:** Changing fetch type to EAGER is rarely a valid N+1 fix.
+
+---
 
 ## Repository Generation
 
-### 15. Generate a repository from query requirements
+### 15. Generate a focused Spring Data repository
 
-**Purpose:** generate a repository from query requirements.
+**Purpose:** Generate a focused Spring Data repository.
 
-**When to use it:** A service needs persistence queries without leaking
-database concerns into business code.
+**When to use it:** When an entity needs repository access without overbuilding a data-access API.
 
 **Complete prompt:**
 
-``` text
-Create a Spring Data JPA repository for the following entity and use cases.
+```text
+Create or refine the Spring Data repository needed by this use case.
 
-Entity:
-[PASTE ENTITY]
-
-Required queries:
-[LIST BUSINESS QUERY REQUIREMENTS]
+Inspect the entity model and actual service/query requirements first. Do not generate CRUD methods that Spring Data already provides or speculative finder methods.
 
 Requirements:
-- Spring Boot 3.x, Java 21, explicit imports.
-- Extend the narrowest appropriate Spring Data repository abstraction.
-- Prefer derived queries only when names remain clear.
-- Use @Query for queries whose intent is clearer explicitly.
-- Return Optional only for genuinely optional single results; use collections for multi-result queries.
-- Do not return entities when a projection/DTO is materially safer or more efficient for a read-only use case.
-- Avoid exposing Page where the API does not need total counts; consider Slice when appropriate.
-- Identify required indexes from query predicates/orderings, but do not invent migration changes without showing the rationale.
-- Flag queries likely to cause N+1 behavior.
+- Extend the narrowest appropriate Spring Data repository interface used by the project.
+- Add only queries required by current behavior.
+- Prefer derived queries when they remain clear; use explicit JPQL/native SQL when it communicates intent better.
+- Use projections for read models when loading full entities is unnecessary.
+- Make pagination explicit for potentially unbounded result sets.
+- Avoid returning `null`; use repository conventions such as `Optional` where semantically appropriate.
+- Do not hide complex business logic inside repository default methods.
+- Consider locking only when the concurrency requirement justifies it.
+- Explain index expectations for nontrivial queries.
 
-Generate repository tests using a real relational database via Testcontainers when query semantics matter.
-Run tests and show the results.
+Add focused repository tests for custom queries and edge cases. Run the relevant tests.
 ```
 
-**Expected AI output:** A small repository API aligned to actual use
-cases, with query tests and index observations.
+**Expected AI output:** A minimal repository surface aligned to actual use cases, with tested query behavior.
 
-**Optional follow-up prompts:** -
-`Convert the read-heavy query to a projection.` -
-`Add pagination without forcing a count query when it is unnecessary.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Repository methods should express application data
-needs, not become a grab bag of every possible query.
+- `Convert the heaviest read query to a projection.`
+- `Review custom repository methods for missing pagination or index assumptions.`
 
-### 16. Review Spring Data repository usage
+**Notes or cautions:** Repository interfaces should describe persistence needs, not become a second service layer.
 
-**Purpose:** review Spring Data repository usage.
+---
 
-**When to use it:** Repository code has grown and may contain
-inefficient or misplaced operations.
+### 16. Review repository query efficiency
+
+**Purpose:** Review repository query efficiency.
+
+**When to use it:** When Spring Data methods work functionally but database efficiency is uncertain.
 
 **Complete prompt:**
 
-``` text
-Review these Spring Data JPA repositories and their callers.
+```text
+Review the selected Spring Data repositories for query efficiency and correctness.
 
-Code:
-[PASTE REPOSITORIES AND RELEVANT SERVICE METHODS]
+Trace each nontrivial repository method to its callers and determine expected cardinality and access pattern. Evaluate:
+- N+1 query risk;
+- accidental full-table scans;
+- unbounded list results;
+- unnecessary entity hydration;
+- join-fetch pagination problems;
+- incorrect count-query behavior;
+- repeated existence/load round trips;
+- database functions that defeat indexes;
+- missing projections;
+- pessimistic locks that are broader than necessary.
 
-Check:
-- Overly broad repository interfaces.
-- Long or ambiguous derived query names.
-- Repeated queries that should be consolidated.
-- Entity loading when only a few columns are needed.
-- N+1 patterns.
-- Unbounded findAll-style operations.
-- Misuse of save() for already-managed entities.
-- Existence checks followed by redundant reads.
-- Incorrect Optional usage.
-- Pagination/count-query costs.
-- Transaction assumptions in repository callers.
+Use available SQL logging, tests, query plans, or schema indexes where possible. Do not optimize based only on method names.
 
-For each issue show the actual call path and likely SQL/runtime effect.
-Do not propose custom repositories unless Spring Data becomes genuinely inadequate.
-Recommend incremental changes and tests that verify query behavior.
+Return prioritized findings first. For approved changes, make the smallest query/repository modifications, add regression/performance-oriented integration tests where practical, and run the build.
 ```
 
-**Expected AI output:** A call-path-aware repository review focused on
-SQL behavior and maintainability.
+**Expected AI output:** Evidence-based repository optimization recommendations and verified targeted changes.
 
-**Optional follow-up prompts:** -
-`Show the expected SQL before and after the top recommendation.` -
-`Implement only the N+1 fix and verify it with an integration test.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Repository abstractions do not remove the need to
-reason about generated SQL.
+- `Inspect the execution plan for the highest-volume query.`
+- `Replace full-entity loading with the smallest useful projection.`
+
+**Notes or cautions:** Do not add indexes blindly from application code; coordinate schema changes with migrations.
+
+---
 
 ## DTO Generation
 
-### 17. Design API DTOs without exposing entities
+### 17. Generate API request and response DTOs
 
-**Purpose:** design API DTOs without exposing entities.
+**Purpose:** Generate API request and response DTOs.
 
-**When to use it:** A REST endpoint needs stable request/response
-contracts.
+**When to use it:** When an API contract should be separated from persistence/domain objects.
 
 **Complete prompt:**
 
-``` text
-Design request and response DTOs for this Spring Boot 3.x API use case.
+```text
+Create request and response DTOs for the selected Spring Boot API operation.
 
-Use case:
-[DESCRIBE OPERATION]
-Current entity/domain types:
-[PASTE RELEVANT TYPES]
-Example JSON, if any:
-[PASTE]
+Inspect the existing API conventions and domain model. Design DTOs around the external contract, not as automatic copies of JPA entities.
 
 Requirements:
-- Java 21; prefer records for immutable DTOs when appropriate.
-- Explicit imports.
-- Do not expose JPA entities directly.
-- Separate request and response types when their responsibilities differ.
-- Put Jakarta Validation constraints on inbound request DTOs where appropriate.
-- Do not copy database-only fields into the public contract.
-- Make nullability/optional fields explicit.
-- Preserve API evolution concerns: names, identifiers, timestamps, enums, and compatibility.
-- Avoid a generic BaseDto hierarchy.
+- Use Java 21 records when they fit immutable data-carrier semantics and project conventions.
+- Separate request and response models when their responsibilities differ.
+- Apply Jakarta Bean Validation to request constraints that belong at the API boundary.
+- Do not leak persistence-only fields, lazy relationships, internal audit data, or domain implementation details.
+- Use stable external names and types.
+- Represent optionality deliberately; do not use `Optional` as a DTO field unless the project has a specific convention requiring it.
+- Keep business validation in the domain/service layer rather than duplicating it as annotation-only validation.
+- Preserve backward compatibility for existing endpoints.
 
-First propose the contract and explain field choices. Then generate DTOs and focused validation/serialization tests.
-Compile and run tests.
+Implement mapping using the project's established approach. Add controller/serialization tests for contract-critical fields and validation.
 ```
 
-**Expected AI output:** Stable, minimal API contracts separated from
-persistence entities.
+**Expected AI output:** Contract-oriented DTOs with validation and mapping, independent of entity structure.
 
-**Optional follow-up prompts:** -
-`Add an update DTO with explicit patch semantics.` -
-`Review enum evolution and unknown-value handling for this contract.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** DTOs are API contracts, not mechanical copies of
-entity fields.
+- `Split create and update requests where their validation semantics differ.`
+- `Review the response DTO for accidental persistence leakage.`
 
-### 18. Review DTO sprawl and duplication
+**Notes or cautions:** DTOs are API contracts; changing them can be more consequential than changing internal entities.
 
-**Purpose:** review DTO sprawl and duplication.
+---
 
-**When to use it:** A service has many nearly identical DTOs and mapping
-code.
+### 18. Design DTOs for partial updates
+
+**Purpose:** Design DTOs for partial updates.
+
+**When to use it:** When implementing PATCH-like behavior without ambiguous null semantics.
 
 **Complete prompt:**
 
-``` text
-Review this Spring Boot service's DTO model for useful versus harmful duplication.
+```text
+Design the request model and update flow for a partial-update endpoint in this Spring Boot application.
 
-DTOs and endpoint use cases:
-[PASTE OR ATTACH]
+First determine the existing API semantics and whether JSON Merge Patch, JSON Patch, or a project-specific PATCH contract is appropriate. Do not treat `null` and “field absent” as equivalent unless that is explicitly the contract.
 
-Classify duplication as:
-- Intentional contract separation.
-- Safe to consolidate.
-- Similar-looking but semantically different and should remain separate.
+Address:
+- how omitted fields differ from fields explicitly set to null;
+- validation of changed fields;
+- immutable versus mutable domain objects;
+- authorization of field-level changes if applicable;
+- optimistic locking/version conflicts;
+- mapping without overwriting unspecified values;
+- backward-compatible response behavior.
 
-Evaluate request/response reuse, create/update semantics, internal versus external DTOs, records, validation annotations, serialization concerns, and versioning.
-Do not merge DTOs merely to reduce class count.
-Prefer explicit contracts when consolidation would couple unrelated endpoints.
-Return a proposed DTO map showing which endpoint uses which type.
-Only then propose small refactors and tests.
+Recommend the simplest contract that preserves unambiguous semantics. After approval, implement it incrementally with request DTOs, service logic, exception mapping, and tests for absent/null/value cases.
 ```
 
-**Expected AI output:** A semantic DTO consolidation review rather than
-a superficial DRY exercise.
+**Expected AI output:** An unambiguous partial-update contract and implementation with edge-case tests.
 
-**Optional follow-up prompts:** -
-`Implement the safest consolidation only.` -
-`Identify DTOs that are accidentally tied to JPA entities.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Some duplication protects API boundaries and is
-cheaper than coupling.
+- `Add optimistic-lock conflict handling to the update flow.`
+- `Test explicit-null versus omitted-field behavior.`
+
+**Notes or cautions:** Ordinary DTOs with nullable fields often cannot distinguish omission from explicit null.
+
+---
 
 ## MapStruct
 
-### 19. Introduce MapStruct for repetitive mappings
+### 19. Introduce MapStruct for nontrivial mappings
 
-**Purpose:** introduce MapStruct for repetitive mappings.
+**Purpose:** Introduce MapStruct for nontrivial mappings.
 
-**When to use it:** Manual DTO/entity mapping has become repetitive
-enough to justify generated mapping.
-
-**Complete prompt:**
-
-``` text
-Evaluate and, if justified, introduce MapStruct into this Java 21 / Spring Boot 3.x service.
-
-Current mappings:
-[PASTE MAPPING CODE]
-
-First determine whether MapStruct improves maintainability here. Consider mapping volume, custom logic, nested mappings, update semantics, and debugging cost.
-If justified:
-- Add Gradle dependencies/annotation processor with compatible versions.
-- Use Spring component model.
-- Use constructor injection where collaborators are needed.
-- Make unmapped target handling strict enough to catch accidental field drift.
-- Keep business rules out of mapping methods.
-- Use explicit mappings where names or semantics differ.
-- Do not silently map identifiers, audit fields, or security-sensitive fields.
-- Add unit tests for non-trivial mappings.
-
-Implement incrementally, compile generated sources, and run tests.
-If MapStruct is not justified, say so and recommend the simpler alternative.
-```
-
-**Expected AI output:** A reasoned MapStruct adoption decision and, when
-appropriate, a strict tested mapper.
-
-**Optional follow-up prompts:** -
-`Add a partial-update mapper that does not overwrite fields with null unintentionally.` -
-`Review generated mapper behavior for nested entities.`
-
-**Notes / cautions:** Generated mapping is valuable for structural
-translation, not domain decisions.
-
-### 20. Review MapStruct mapper correctness
-
-**Purpose:** review MapStruct mapper correctness.
-
-**When to use it:** Existing mappers may silently overwrite or expose
-fields.
+**When to use it:** When manual DTO/entity mapping is repetitive enough to justify generated mapping code.
 
 **Complete prompt:**
 
-``` text
-Review these MapStruct mappers for correctness and maintainability.
+```text
+Evaluate whether MapStruct is justified for the selected mappings, and introduce it only if it reduces meaningful repetitive mapping code.
 
-Inputs:
-[PASTE MAPPERS, DTOs, ENTITIES]
+Inspect current manual mappings and Gradle configuration first. If MapStruct is justified:
+- use a version compatible with the current Spring Boot/Java toolchain;
+- configure Gradle annotation processing correctly;
+- use Spring component integration only where injection is actually useful;
+- make unmapped target properties visible rather than silently ignored;
+- keep business decisions and repository lookups out of generated mappers;
+- use explicit mapping methods for differing field names or nested structures;
+- avoid cycles caused by bidirectional JPA graphs;
+- keep entity mutation semantics safe.
 
-Inspect:
-- Unmapped fields and implicit same-name mappings.
-- ID/audit/version field handling.
-- NullValuePropertyMappingStrategy and update behavior.
-- Nested entity creation.
-- Collection replacement versus merge semantics.
-- Enum conversions.
-- Date/time conversions and timezone assumptions.
-- Cyclic mapping risk.
-- Business logic embedded in expressions/default methods.
-- Spring injection configuration.
-
-For every risky mapping show a concrete input that would produce the wrong result.
-Recommend explicit mappings where ambiguity exists.
-Do not change all mappers at once; prioritize by data-loss or security risk.
-Add tests before fixing high-risk behavior.
+Migrate one cohesive mapping area first. Add mapping tests for transformations with business significance. Compile and run tests. Explain why MapStruct is preferable here to straightforward manual mapping.
 ```
 
-**Expected AI output:** A failure-oriented mapper audit with regression
-tests and incremental corrections.
+**Expected AI output:** A justified, correctly configured MapStruct integration with one proven mapping slice.
 
-**Optional follow-up prompts:** -
-`Add a regression test for the highest-risk update mapping.` -
-`Make unmapped target fields fail the build where appropriate.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Update mappers are especially dangerous because
-null/default semantics can cause data loss.
+- `Convert the next repetitive mapper using the same conventions.`
+- `Enable stricter unmapped-property reporting and fix legitimate gaps.`
+
+**Notes or cautions:** MapStruct should remove boilerplate, not become a hidden business-logic layer.
+
+---
+
+### 20. Review existing MapStruct mappers
+
+**Purpose:** Review existing MapStruct mappers.
+
+**When to use it:** When generated mappings are hard to understand or silently drop fields.
+
+**Complete prompt:**
+
+```text
+Audit the MapStruct mappers in this repository for correctness and maintainability.
+
+Check:
+- unmapped source/target properties;
+- accidental field loss during updates;
+- null-value strategies;
+- collection and nested-object behavior;
+- use of `@MappingTarget`;
+- entity relationship mapping that could trigger lazy loads;
+- expressions or default methods containing business logic;
+- mapper-to-mapper dependencies;
+- component model consistency;
+- generated code assumptions that differ from domain invariants.
+
+Do not edit initially. Identify high-risk mappings and show concrete examples of incorrect or fragile behavior.
+
+For approved fixes, change mapper configuration/methods incrementally, add focused tests, inspect generated behavior when useful, compile, and run tests.
+```
+
+**Expected AI output:** A risk-focused mapper audit with tests protecting important transformations.
+
+**Optional follow-up prompts:**
+
+- `Fix update mappings that overwrite fields with null.`
+- `Identify mapper methods that may initialize lazy JPA relationships.`
+
+**Notes or cautions:** Generated code is still application code; validate semantics rather than trusting compilation.
+
+---
 
 ## Service Layer
 
-### 21. Design a transactional application service
+### 21. Design a service/use-case boundary
 
-**Purpose:** design a transactional application service.
+**Purpose:** Design a service/use-case boundary.
 
-**When to use it:** A use case needs orchestration across repositories
-and domain operations.
-
-**Complete prompt:**
-
-``` text
-Design and implement a Spring Boot application service for this use case.
-
-Use case:
-[DESCRIBE BUSINESS OPERATION]
-Relevant entities/repositories/clients:
-[PASTE OR ATTACH]
-
-Requirements:
-- Java 21, Spring Boot 3.x, explicit imports.
-- Constructor injection.
-- Keep controller concerns out of the service.
-- Define a clear transaction boundary.
-- Load only data required for the use case.
-- Enforce business invariants in the appropriate domain/application location.
-- Distinguish expected business failures from infrastructure failures.
-- Avoid calling remote services while holding a database transaction unless there is a justified consistency requirement.
-- Do not create an interface solely for mocking or convention.
-- Make side effects and ordering explicit.
-- Design for idempotency if the operation can be retried.
-
-First explain the orchestration and transaction decision. Then implement with unit tests and, where persistence matters, integration tests.
-Run all relevant tests.
-```
-
-**Expected AI output:** A focused application service with explicit
-orchestration, transaction semantics, and tests.
-
-**Optional follow-up prompts:** -
-`Add idempotency for duplicate requests.` -
-`Review whether any logic belongs in the aggregate rather than the service.`
-
-**Notes / cautions:** Service classes should coordinate use cases, not
-become generic containers for all business logic.
-
-### 22. Review an oversized service class
-
-**Purpose:** review an oversized service class.
-
-**When to use it:** A service class has accumulated many
-responsibilities.
+**When to use it:** When business logic is spread between controllers, repositories, and utility classes.
 
 **Complete prompt:**
 
-``` text
-Review this Spring Boot service class and identify cohesive responsibilities before proposing refactoring.
+```text
+Refactor the selected feature toward a clear application/service boundary.
 
-Code:
-[PASTE SERVICE AND KEY COLLABORATORS]
+Trace the full request/use-case flow before editing. Identify which logic is:
+- transport-specific;
+- orchestration/application logic;
+- domain/business logic;
+- persistence/infrastructure logic.
 
-Analyze:
-- Distinct use cases mixed together.
-- Business rules versus orchestration.
-- Transaction boundaries.
-- Repository and external-client coupling.
-- Hidden temporal ordering.
-- Repeated validation/mapping.
-- Methods that belong to domain objects or dedicated collaborators.
-- Test complexity as a signal of poor cohesion.
+Propose a service design that makes the use case explicit without creating unnecessary interfaces or pass-through layers. Prefer constructor injection. Keep controllers thin, repositories persistence-focused, and transaction boundaries at the use-case/service level.
 
-Do not split the class by arbitrary line count or create one class per method.
-Propose a target responsibility map and dependency direction.
-Rank refactor steps so each step preserves behavior and can be committed independently.
-Add characterization tests before moving risky logic.
-Compile and run tests after every step.
+Do not move code mechanically. Preserve domain invariants and behavior. If an interface has only one implementation, keep it only when it provides a meaningful architectural boundary, test seam, or alternate implementation requirement.
+
+After approval, refactor in small steps, keeping tests green. Add tests where current behavior is insufficiently protected. Run the relevant tests after each logical change.
 ```
 
-**Expected AI output:** A behavior-preserving decomposition plan based
-on cohesion rather than class size.
+**Expected AI output:** A clearer service boundary with reduced leakage between HTTP, business, and persistence concerns.
 
-**Optional follow-up prompts:** -
-`Implement only the first refactor step.` -
-`Identify which tests should become characterization tests before restructuring.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** More classes are not automatically better; each
-extracted type should have a coherent reason to change.
+- `Move only the first use case into the proposed service structure.`
+- `Review service interfaces and remove ones that add no architectural value.`
+
+**Notes or cautions:** Layering is a means to control responsibilities, not a requirement to create one class per layer.
+
+---
+
+### 22. Review service class responsibilities
+
+**Purpose:** Review service class responsibilities.
+
+**When to use it:** When a service has become large, highly coupled, or difficult to test.
+
+**Complete prompt:**
+
+```text
+Review the selected Spring service as a senior Java architect.
+
+Measure responsibility rather than class size alone. Analyze:
+- number of distinct use cases;
+- injected dependencies and what they imply;
+- transaction scope;
+- domain rules versus orchestration;
+- repeated mapping/validation;
+- external I/O mixed with database work;
+- conditional complexity;
+- duplicated workflows;
+- test setup complexity;
+- hidden temporal coupling between methods.
+
+Do not modify code first. Propose responsibility boundaries and an incremental extraction order. Avoid “one method = one class” fragmentation.
+
+For each recommendation, explain the architectural reason, expected testability/maintainability benefit, and risk. After approval, refactor one responsibility at a time and run tests after each step.
+```
+
+**Expected AI output:** A responsibility-based decomposition plan rather than arbitrary class splitting.
+
+**Optional follow-up prompts:**
+
+- `Extract the highest-coupling responsibility first.`
+- `Show which injected dependencies should move with each extracted responsibility.`
+
+**Notes or cautions:** Large services are not automatically bad; mixed reasons to change are the stronger signal.
+
+---
 
 ## REST Controllers
 
-### 23. Generate a REST controller from an approved contract
+### 23. Create a production REST endpoint
 
-**Purpose:** generate a REST controller from an approved contract.
+**Purpose:** Create a production REST endpoint.
 
-**When to use it:** An API contract exists and needs a thin Spring MVC
-controller.
+**When to use it:** When implementing a new HTTP operation in an existing Spring Boot API.
 
 **Complete prompt:**
 
-``` text
-Implement a Spring Boot 3.x REST controller for this approved API contract.
+```text
+Implement the requested REST endpoint in the current Spring Boot 3.x application.
 
-Contract:
-[PASTE METHOD, PATH, REQUEST, RESPONSE, STATUS CODES, ERROR CASES]
-Service API:
-[PASTE SERVICE METHODS]
+First inspect existing API conventions, routing, error format, security, DTOs, and tests. Preserve established contract conventions where they are sound.
 
 Requirements:
-- Java 21, explicit imports, constructor injection.
-- Keep the controller thin: HTTP translation, validation, authorization hooks, and delegation only.
-- Use request/response DTOs, not JPA entities.
-- Use appropriate ResponseEntity/status semantics only where needed.
-- Do not catch broad Exception in controller methods.
-- Use Jakarta Validation for request validation.
-- Make URI/path/query parameter semantics explicit.
-- Preserve idempotency semantics for PUT/DELETE and document POST behavior.
-- Do not return 200 for every outcome.
-- Add MockMvc tests covering happy path, validation, not-found/business errors, and status/content type.
+- Keep the controller focused on HTTP concerns.
+- Use request/response DTOs rather than exposing JPA entities.
+- Apply Jakarta Bean Validation at the request boundary.
+- Delegate business behavior to an application/service component.
+- Return semantically correct HTTP status codes and headers.
+- Handle not-found, conflict, validation, and domain failures through centralized exception mapping.
+- Preserve idempotency semantics appropriate to the HTTP method.
+- Avoid leaking stack traces or internal exception messages.
+- Consider pagination for collection endpoints.
+- Do not add transactions to the controller.
 
-Explain endpoint decisions, implement incrementally, then run tests.
+Add focused MVC/API tests for success and important failure cases. Compile and run tests. Report any contract decisions that could affect clients.
 ```
 
-**Expected AI output:** A thin, contract-driven controller with
-meaningful HTTP semantics and MockMvc coverage.
+**Expected AI output:** A thin, contract-focused controller endpoint with DTOs, validation, error handling, and tests.
 
-**Optional follow-up prompts:** -
-`Add conditional request/ETag support if appropriate for this resource.` -
-`Review whether pagination metadata belongs in headers or response body.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** HTTP status codes are part of the API contract;
-choose them deliberately.
+- `Add conditional request/ETag support if the resource needs concurrency-aware updates.`
+- `Review the endpoint against HTTP idempotency and status-code semantics.`
 
-### 24. Review REST API semantics
+**Notes or cautions:** Do not use HTTP 200 as a universal success/failure envelope.
 
-**Purpose:** review REST API semantics.
+---
 
-**When to use it:** Existing controllers work but may have inconsistent
-HTTP design.
+### 24. Review REST API consistency
+
+**Purpose:** Review REST API consistency.
+
+**When to use it:** When an API has accumulated inconsistent routes, statuses, payloads, or error behavior.
 
 **Complete prompt:**
 
-``` text
-Review these Spring Boot REST controllers as a production API contract.
-
-Controllers/DTOs:
-[PASTE OR ATTACH]
+```text
+Review the REST controllers in the selected API area for contract consistency.
 
 Evaluate:
-- Resource naming and URI consistency.
-- HTTP method semantics and idempotency.
-- Status codes.
-- Request validation.
-- Content types.
-- Error representation consistency.
-- Pagination/filter/sort semantics.
-- Entity exposure.
-- Controller business logic.
-- Backward compatibility implications of proposed changes.
-- Security-sensitive parameters or mass-assignment risk.
+- resource naming and URI structure;
+- HTTP method semantics;
+- status codes;
+- request/response DTO consistency;
+- pagination/filter/sort conventions;
+- validation behavior;
+- error representation;
+- idempotency;
+- content types;
+- versioning/backward compatibility;
+- accidental exposure of persistence models;
+- controller logic that belongs in services.
 
-Separate findings into:
-1. Bugs/contract violations that should be fixed.
-2. Design improvements requiring API versioning or client coordination.
-3. Stylistic preferences that are not worth changing.
+Do not change public contracts initially. Categorize findings as:
+1. internal refactors with no contract change;
+2. backward-compatible contract improvements;
+3. breaking changes requiring versioning/migration.
 
-Do not break clients for cosmetic consistency.
-Provide contract tests for any behavior-changing fix.
+Provide specific examples from the repository and a staged remediation plan. Implement only approved categories and add contract regression tests.
 ```
 
-**Expected AI output:** A compatibility-aware REST review that
-distinguishes defects from optional redesign.
+**Expected AI output:** A compatibility-aware REST consistency review and staged remediation plan.
 
-**Optional follow-up prompts:** -
-`Create tests that freeze the current public contract before refactoring.` -
-`Propose a versioned migration for the breaking API issues.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** An aesthetically cleaner API is not worth an
-unplanned breaking change.
+- `Apply only non-breaking internal controller refactors.`
+- `Design a migration path for the highest-value breaking contract change.`
+
+**Notes or cautions:** API cleanup can impose significant client costs; classify compatibility before editing.
+
+---
 
 ## Validation
 
-### 25. Design validation across API and domain layers
+### 25. Separate boundary and business validation
 
-**Purpose:** design validation across API and domain layers.
+**Purpose:** Separate boundary and business validation.
 
-**When to use it:** A use case has both structural input checks and
-business invariants.
-
-**Complete prompt:**
-
-``` text
-Design validation for this Spring Boot use case without duplicating rules across layers.
-
-Request DTO/domain/use case:
-[PASTE]
-
-Classify each rule as:
-- Transport/input shape validation suitable for Jakarta Validation.
-- Domain invariant that must hold regardless of entry point.
-- Application/use-case rule requiring repositories or external state.
-- Database constraint that should remain enforced by the database.
-
-Implement each rule in the appropriate layer.
-Avoid service methods full of manual null/string checks that Jakarta Validation can handle.
-Do not put repository calls inside Bean Validation constraints unless there is a compelling, well-tested reason.
-Define stable error codes/messages for client-relevant validation failures.
-Add tests at the layer where each rule lives and run them.
-```
-
-**Expected AI output:** A layered validation design with each rule
-enforced in the right place.
-
-**Optional follow-up prompts:** -
-`Add cross-field validation for the request DTO.` -
-`Map domain validation failures to the API error model.`
-
-**Notes / cautions:** Validation placement should reflect where the
-truth of the rule lives.
-
-### 26. Review custom Bean Validation annotations
-
-**Purpose:** review custom Bean Validation annotations.
-
-**When to use it:** Custom validators may be stateful, overly broad, or
-performing I/O.
+**When to use it:** When validation annotations and service checks are mixed or duplicated.
 
 **Complete prompt:**
 
-``` text
-Review these Jakarta Bean Validation constraints and validators in a Spring Boot 3.x application.
+```text
+Review validation for the selected use case and separate API-boundary validation from business/domain invariants.
 
-Code:
-[PASTE ANNOTATIONS, VALIDATORS, DTOs]
+Inventory Jakarta Bean Validation annotations, custom validators, service checks, database constraints, and domain methods.
 
-Check:
-- Whether a built-in constraint would be clearer.
-- Null-handling semantics.
-- Thread safety and mutable validator state.
-- Cross-field versus field-level placement.
-- Dependency injection or database/network I/O inside validators.
-- Error message stability and localization.
-- Validation groups that make control flow hard to understand.
-- Test coverage for boundary values.
+Classify each rule:
+- syntactic/structural request validation;
+- business invariant;
+- cross-aggregate or database-dependent rule;
+- persistence constraint;
+- security/authorization rule.
 
-Recommend removing custom constraints that do not earn their complexity.
-For retained validators, add focused unit tests and make failure semantics explicit.
-Do not change public error messages without identifying compatibility impact.
+Recommend where each rule should live and why. Avoid custom Bean Validation constraints that require repositories unless that is clearly the best project-specific design.
+
+After approval, refactor incrementally so invalid requests fail consistently while business rules remain enforceable even outside HTTP entry points. Add tests at the correct level and run the build.
 ```
 
-**Expected AI output:** A concise custom-validation audit with simpler
-alternatives and boundary tests.
+**Expected AI output:** A validation model where each rule is enforced at the appropriate boundary.
 
-**Optional follow-up prompts:** -
-`Replace the unnecessary custom validator with standard constraints.` -
-`Add tests for null, empty, boundary, and malformed values.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Validators should be deterministic and cheap;
-remote/database validation usually belongs in the application layer.
+- `Move one business invariant out of DTO annotations into domain/service logic.`
+- `Align database constraints with application validation for this field.`
+
+**Notes or cautions:** Bean Validation should not become a substitute for domain invariants or authorization.
+
+---
+
+### 26. Implement cross-field validation
+
+**Purpose:** Implement cross-field validation.
+
+**When to use it:** When validity depends on relationships between multiple request fields.
+
+**Complete prompt:**
+
+```text
+Implement the cross-field validation required by the selected request model.
+
+First determine whether the rule is purely structural and belongs at the request boundary or is a business rule that belongs deeper in the application. If it is boundary validation, use a maintainable Jakarta Bean Validation approach.
+
+Requirements:
+- produce a clear client-facing validation message;
+- attach the violation to the most useful field or object location;
+- keep the validator deterministic and free of database/network I/O;
+- handle nulls consistently with field-level constraints;
+- avoid reflection-heavy generic validators when a typed validator is clearer;
+- add tests for valid, invalid, null, and boundary cases.
+
+If the rule is actually a domain invariant, explain why and implement it there instead. Compile and run tests.
+```
+
+**Expected AI output:** A correctly placed and thoroughly tested cross-field rule.
+
+**Optional follow-up prompts:**
+
+- `Add tests showing interaction with field-level constraints.`
+- `Review whether this rule must also be protected by a database constraint.`
+
+**Notes or cautions:** Do not perform repository lookups from a validation annotation without a compelling reason.
+
+---
 
 ## Transactions
 
 ### 27. Review transaction boundaries
 
-**Purpose:** review transaction boundaries.
+**Purpose:** Review transaction boundaries.
 
-**When to use it:** A service has @Transactional annotations but
-consistency behavior is unclear.
-
-**Complete prompt:**
-
-``` text
-Review transaction boundaries in this Spring Boot 3.x service.
-
-Code:
-[PASTE SERVICES, REPOSITORIES, AND EXTERNAL CLIENT CALLS]
-
-For each use case determine:
-- Where the transaction begins and ends.
-- Which entities are managed.
-- Whether lazy loading depends on an accidental open session.
-- Whether remote calls occur inside database transactions.
-- Whether readOnly=true is useful and correctly placed.
-- Whether propagation settings are necessary or cargo cult.
-- Whether checked/unchecked exception behavior affects rollback.
-- Whether self-invocation makes @Transactional ineffective.
-- Whether transaction length creates locking/contention risk.
-
-Draw a concise call-path/transaction map.
-Identify correctness issues before performance issues.
-Recommend the smallest boundary changes and add integration tests that prove commit/rollback behavior.
-Do not add REQUIRES_NEW unless the independent commit semantics are explicitly required.
-```
-
-**Expected AI output:** A transaction map, concrete failure analysis,
-and test-backed boundary corrections.
-
-**Optional follow-up prompts:** -
-`Add a rollback integration test for the failure path.` -
-`Move the remote call outside the transaction and explain the consistency tradeoff.`
-
-**Notes / cautions:** Transaction annotations are proxies with specific
-semantics; do not reason about them as ordinary method modifiers.
-
-### 28. Design transaction handling for database plus messaging
-
-**Purpose:** design transaction handling for database plus messaging.
-
-**When to use it:** A use case writes database state and publishes an
-event/message.
+**When to use it:** When transaction behavior is unclear or `@Transactional` is scattered across the codebase.
 
 **Complete prompt:**
 
-``` text
-Design reliable transaction handling for this Spring Boot use case that updates a relational database and publishes a message.
+```text
+Review transaction boundaries for the selected Spring Boot feature.
 
-Use case and infrastructure:
-[DESCRIBE DB, BROKER, DELIVERY REQUIREMENTS]
+Trace each use case from entry point through service, repository, and external integrations. Identify every `@Transactional` annotation and implicit repository transaction.
 
-Do not assume a distributed XA transaction.
-Compare at least:
-- Direct publish inside/after the database transaction.
-- Transactional outbox.
-- Broker-specific transaction support if applicable.
+Evaluate:
+- whether the transaction encloses a complete consistency boundary;
+- read-only versus write transactions;
+- propagation settings;
+- isolation requirements;
+- self-invocation/proxy limitations;
+- lazy loading outside transactions;
+- external network calls performed while database locks are held;
+- event publication timing;
+- retry behavior;
+- exception types that affect rollback.
 
-Evaluate failure windows, duplicate delivery, ordering, retry, idempotent consumers, and operational complexity.
-Recommend the simplest design that satisfies these stated consistency requirements:
-[REQUIREMENTS]
+Do not change annotations first. Produce a transaction map and prioritized risks. Recommend the simplest boundary for each use case.
 
-If recommending an outbox, define table/entity ownership, write transaction, publisher behavior, retry/locking approach, cleanup, and consumer idempotency.
-Provide an incremental implementation plan and tests for the important failure windows.
+After approval, modify one flow at a time and add integration tests for commit/rollback behavior and concurrency where relevant. Run tests.
 ```
 
-**Expected AI output:** A consistency-driven database-plus-messaging
-design with explicit failure semantics.
+**Expected AI output:** A use-case-level transaction map with evidence-based boundary corrections.
 
-**Optional follow-up prompts:** -
-`Implement the outbox write path first, without the publisher.` -
-`Design the idempotent consumer contract for duplicate events.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Exactly-once end-to-end delivery is usually not
-available; design explicitly for retries and duplicates.
+- `Fix the transaction that holds locks during external I/O.`
+- `Add a rollback integration test for the highest-risk write flow.`
+
+**Notes or cautions:** More `@Transactional` annotations do not create safer transactions.
+
+---
+
+### 28. Design safe external I/O around a database transaction
+
+**Purpose:** Design safe external I/O around a database transaction.
+
+**When to use it:** When a use case updates the database and also calls another service or broker.
+
+**Complete prompt:**
+
+```text
+Redesign the selected use case so database state changes and external I/O have explicit, failure-aware semantics.
+
+Inspect the current transaction and integration flow. Determine what happens if:
+- the database commits but the external call fails;
+- the external call succeeds but the database rolls back;
+- the operation is retried;
+- the same message/request is processed twice.
+
+Do not attempt a distributed ACID transaction by default. Evaluate patterns appropriate to the actual requirement, including transactional outbox, after-commit publication, idempotency keys, retries, or compensating actions.
+
+Recommend one design with rationale and operational implications. After approval, implement the smallest viable change, including schema/migration changes if needed, tests for failure windows, and observable logging/metrics. Run the build and relevant integration tests.
+```
+
+**Expected AI output:** A failure-aware consistency design for database plus external side effects.
+
+**Optional follow-up prompts:**
+
+- `Implement the transactional outbox for this flow.`
+- `Add duplicate-delivery tests and idempotent consumer behavior.`
+
+**Notes or cautions:** Network calls inside long database transactions can amplify lock contention and failure coupling.
+
+---
 
 ## Exception Handling
 
-### 29. Create a consistent REST error model
+### 29. Create centralized API exception handling
 
-**Purpose:** create a consistent REST error model.
+**Purpose:** Create centralized API exception handling.
 
-**When to use it:** An API needs centralized, stable error responses.
+**When to use it:** When controllers return inconsistent errors or catch exceptions locally.
 
 **Complete prompt:**
 
-``` text
-Design and implement centralized exception handling for this Spring Boot 3.x REST API.
+```text
+Create or refactor centralized exception handling for the selected Spring Boot REST API.
 
-Known failure types:
-[LIST DOMAIN, VALIDATION, NOT-FOUND, CONFLICT, INFRASTRUCTURE FAILURES]
+Inspect current exception types, controller catches, validation failures, security behavior, and existing error payloads. Preserve public compatibility where required.
 
 Requirements:
-- Use @RestControllerAdvice.
-- Produce a stable error response with fields justified by client needs.
-- Map expected domain/application failures to deliberate HTTP statuses.
-- Handle Jakarta Validation errors consistently.
-- Do not expose stack traces, SQL, class names, secrets, or internal exception messages to clients.
-- Generate/propagate a correlation or trace identifier if the platform provides one.
-- Log unexpected failures once at the appropriate boundary.
-- Preserve the original exception as the cause when translating internally.
-- Avoid a giant catch-all hierarchy of custom exceptions.
+- use a centralized Spring MVC exception-handling mechanism;
+- map domain/application exceptions to deliberate HTTP statuses;
+- provide a stable error response shape, preferably aligned with existing standards such as Problem Details if the project uses them;
+- include a safe correlation/request identifier when available;
+- never expose stack traces, SQL details, secrets, or raw internal messages to clients;
+- preserve useful validation field errors;
+- log unexpected failures once at the appropriate boundary;
+- do not catch `Exception` in every controller.
 
-First propose the error taxonomy and mapping table. Then implement handlers and MockMvc tests.
-Run tests.
+Add MVC tests for representative validation, not-found, conflict, and unexpected failures. Compile and run tests.
 ```
 
-**Expected AI output:** A centralized, non-leaky API error contract with
-explicit mappings and tests.
+**Expected AI output:** A centralized, stable, safe error contract with representative tests.
 
-**Optional follow-up prompts:** -
-`Add RFC 9457 Problem Details if it fits the existing API contract.` -
-`Review existing clients before changing error field names.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Error payloads are public contracts; avoid leaking
-implementation details into them.
+- `Migrate one legacy controller away from local try/catch handling.`
+- `Review which exception messages are safe for clients versus logs only.`
 
-### 30. Review exception translation and logging
+**Notes or cautions:** Exception mapping is part of the external API contract.
 
-**Purpose:** review exception translation and logging.
+---
 
-**When to use it:** A codebase catches and rethrows exceptions at many
-layers.
+### 30. Design domain exception taxonomy
+
+**Purpose:** Design domain exception taxonomy.
+
+**When to use it:** When many generic runtime exceptions obscure expected business failures.
 
 **Complete prompt:**
 
-``` text
-Review exception handling across this Spring Boot call path.
+```text
+Review exceptions in the selected domain/application area and design the smallest useful exception taxonomy.
 
-Code:
-[PASTE CONTROLLER -> SERVICE -> REPOSITORY/CLIENT PATH]
+Trace where exceptions are created, translated, logged, and exposed. Distinguish:
+- expected business rejections;
+- not-found conditions;
+- concurrency/conflict conditions;
+- integration failures;
+- programming defects/unexpected failures.
 
-Identify:
-- Catch-and-rethrow blocks that add no value.
-- Lost causes/stack traces.
-- Exceptions logged multiple times.
-- Infrastructure exceptions leaking into API/domain contracts.
-- Broad catches that hide programming errors.
-- Retryable versus non-retryable failures.
-- Incorrect conversion of every failure to 500 or 400.
-- Transaction rollback implications.
+Do not create a class hierarchy for every error message. Recommend exception types only where callers or boundaries need distinct behavior.
 
-Propose a small exception taxonomy based on caller decisions, not one exception class per failure message.
-State exactly where each failure should be translated and where it should be logged.
-Add tests for the most important translations before refactoring.
+Ensure exceptions preserve useful causes, avoid sensitive data, and map cleanly at API/integration boundaries. After approval, refactor incrementally and update tests to assert behavior rather than brittle full message text.
 ```
 
-**Expected AI output:** A boundary-oriented exception strategy that
-reduces noise and preserves diagnostics.
+**Expected AI output:** A restrained exception model that improves boundary behavior without class proliferation.
 
-**Optional follow-up prompts:** -
-`Remove redundant catch/log/rethrow blocks incrementally.` -
-`Add a test proving the original cause is preserved.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Translate exceptions when crossing a meaningful
-abstraction boundary, not at every method.
+- `Replace generic `RuntimeException` only in the highest-value flows.`
+- `Map the approved exception types to the existing API error contract.`
+
+**Notes or cautions:** Exception classes should represent behaviorally distinct failure categories.
+
+---
 
 ## Logging
 
-### 31. Design production logging for a Spring Boot service
+### 31. Review production logging
 
-**Purpose:** design production logging for a Spring Boot service.
+**Purpose:** Review production logging.
 
-**When to use it:** A service needs useful logs without leaking data or
-generating noise.
-
-**Complete prompt:**
-
-``` text
-Design a production logging approach for this Spring Boot 3.x service.
-
-Context:
-[DESCRIBE REQUEST FLOW, DEPLOYMENT, OBSERVABILITY STACK]
-
-Define:
-- What should be logged at application boundaries.
-- Appropriate ERROR/WARN/INFO/DEBUG usage.
-- Correlation/trace identifiers and how they enter log context.
-- Structured logging fields if the platform supports them.
-- Which identifiers are safe and operationally useful.
-- Sensitive data that must never be logged.
-- Exception logging rules to avoid duplicate stack traces.
-- Logging around retries, timeouts, and external calls.
-- Configuration differences between local development and production.
-
-Do not add logs to every method.
-Prefer telemetry/metrics for high-volume numeric events.
-Provide representative code/config changes and tests where log behavior is security-sensitive.
-Keep changes incremental.
-```
-
-**Expected AI output:** A low-noise, traceable logging design aligned
-with production operations.
-
-**Optional follow-up prompts:** -
-`Add structured JSON logging compatible with the stated platform.` -
-`Review the codebase for accidental credential or PII logging.`
-
-**Notes / cautions:** Logs should support diagnosis; they should not
-become an unbounded event database.
-
-### 32. Review logs for sensitive-data exposure
-
-**Purpose:** review logs for sensitive-data exposure.
-
-**When to use it:** A security or production-readiness review needs to
-inspect logging.
+**When to use it:** When logs are noisy, inconsistent, or missing diagnostic context.
 
 **Complete prompt:**
 
-``` text
-Perform a sensitive-data logging review of this Spring Boot code and configuration.
+```text
+Audit logging in the selected Spring Boot application area for production usefulness.
 
-Inputs:
-[PASTE OR ATTACH CONTROLLERS, SERVICES, CLIENTS, EXCEPTION HANDLERS, LOG CONFIG]
+Inspect log statements, exception logging, MDC/correlation context, HTTP logging, persistence logging, and configuration.
 
-Look for:
-- Passwords, tokens, Authorization headers, cookies, API keys.
-- Full request/response bodies.
-- Personal or regulated data.
-- Database connection strings.
-- Secrets embedded in exception messages.
-- DTO/entity toString() output.
-- Logging interceptors/filters that capture headers or bodies.
-- DEBUG/TRACE settings unsafe for production.
+Identify:
+- duplicate logging of the same exception;
+- missing identifiers needed to trace a request or business operation;
+- sensitive data or credentials in logs;
+- excessive INFO logging in hot paths;
+- expensive string construction;
+- misleading severity levels;
+- raw request/response bodies that should not be logged;
+- stack traces for expected business outcomes;
+- missing structured fields where the logging stack supports them.
 
-For each issue identify the exact log statement/configuration and a safer replacement.
-Prefer allow-listing safe fields over brittle redaction after serialization.
-Do not remove operationally useful identifiers unnecessarily.
-Add a regression test or static check for the highest-risk case where practical.
+Do not add logging everywhere. Recommend a minimal event-oriented logging strategy. After approval, make incremental changes and add tests only where logging behavior is contractually/operationally important. Run tests.
 ```
 
-**Expected AI output:** A concrete log-leakage audit with safer
-field-level logging recommendations.
+**Expected AI output:** A production-oriented logging plan emphasizing signal, traceability, and data safety.
 
-**Optional follow-up prompts:** -
-`Implement safe request logging with an allow-list.` -
-`Review exception handlers for indirect secret leakage.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Redaction is a fallback; avoiding collection of
-sensitive values is safer.
+- `Remove duplicate exception logging from one request path.`
+- `Add correlation context propagation for incoming HTTP requests.`
+
+**Notes or cautions:** Logs are operational data; treat personal data, tokens, and secrets as sensitive.
+
+---
+
+### 32. Add traceable business-operation logging
+
+**Purpose:** Add traceable business-operation logging.
+
+**When to use it:** When an important asynchronous or multi-step operation is difficult to diagnose.
+
+**Complete prompt:**
+
+```text
+Add operational logging for the selected business operation so engineers can reconstruct its lifecycle without logging sensitive payloads.
+
+Trace the operation end-to-end and identify a stable correlation/business identifier. Log only meaningful state transitions and failure points.
+
+Requirements:
+- use parameterized logging;
+- include stable identifiers as structured/MDC context when supported;
+- do not log access tokens, credentials, full personal records, or arbitrary request bodies;
+- avoid logging the same exception at multiple layers;
+- distinguish expected retryable failures from terminal failures;
+- keep high-volume per-item detail below INFO unless operationally justified.
+
+Implement consistently with the repository's logging framework. Run tests and explain the chosen events and severity levels.
+```
+
+**Expected AI output:** Concise lifecycle logging that makes a production operation traceable.
+
+**Optional follow-up prompts:**
+
+- `Add metrics for the same success/failure transitions.`
+- `Review this flow for log volume under peak throughput.`
+
+**Notes or cautions:** Correlation IDs are useful only if propagated consistently across boundaries.
+
+---
 
 ## Testing
 
-### 33. Generate a focused service unit test suite
+### 33. Build a balanced test suite for a feature
 
-**Purpose:** generate a focused service unit test suite.
+**Purpose:** Build a balanced test suite for a feature.
 
-**When to use it:** A service class needs fast behavioral tests without
-over-mocking implementation details.
-
-**Complete prompt:**
-
-``` text
-Create JUnit Jupiter tests for this Spring Boot service class.
-
-Code:
-[PASTE SERVICE AND COLLABORATOR INTERFACES/CLASSES]
-
-Use Mockito only for true external collaborators.
-Requirements:
-- Java 21 with explicit imports; no wildcard imports.
-- Arrange / Act / Assert structure where it improves readability.
-- Test observable behavior and important collaborator interactions, not private implementation.
-- Cover happy path, business rejection, and meaningful edge cases.
-- Do not mock value objects or simple domain objects.
-- Avoid lenient stubbing.
-- Verify interactions only when the interaction itself is part of the behavior.
-- Use descriptive test method names.
-- Do not start a Spring context for a pure unit test.
-
-After writing tests, run the relevant Gradle test task and fix compilation/test failures.
-Report any production-code design issue that makes testing unnecessarily difficult rather than hiding it with complicated mocks.
-```
-
-**Expected AI output:** A fast, readable unit suite that tests behavior
-with minimal mocking.
-
-**Optional follow-up prompts:** -
-`Add a parameterized test for the boundary cases.` -
-`Refactor the production code only if the tests expose a real cohesion problem.`
-
-**Notes / cautions:** Mocking every collaborator interaction creates
-brittle tests that mirror implementation.
-
-### 34. Create Testcontainers persistence integration tests
-
-**Purpose:** create Testcontainers persistence integration tests.
-
-**When to use it:** Repository/query behavior must be verified against
-the production database engine.
+**When to use it:** When a feature needs meaningful coverage without relying entirely on full-context tests.
 
 **Complete prompt:**
 
-``` text
-Create Spring Boot 3.x integration tests for these Spring Data JPA repositories using Testcontainers.
+```text
+Review the selected Spring Boot feature and create a balanced test strategy based on risk and framework boundaries.
 
-Database engine/version: [POSTGRESQL/MYSQL/etc.]
-Repositories/entities: [PASTE OR ATTACH]
-Queries to verify: [LIST]
+Use Java 21, JUnit Jupiter, and the repository's established testing libraries. Include explicit imports in all Java code.
 
-Requirements:
-- Java 21, Gradle, explicit imports.
-- Use a real containerized database compatible with production.
-- Apply the same Flyway/Liquibase migrations used by the application if present.
-- Keep test data small and explicit.
-- Verify query semantics, constraints, mappings, transaction behavior, and ordering/pagination where relevant.
-- Do not replace the database with H2 when dialect behavior matters.
-- Make tests deterministic and independent.
-- Reuse container lifecycle sensibly without sharing mutable test state.
+Classify tests into:
+- pure unit tests for business logic;
+- focused Spring slice tests where Spring configuration/serialization/data behavior matters;
+- integration tests for database or external-adapter behavior;
+- minimal full-context tests only where multiple framework layers must be proven together.
 
-Run the integration-test task and report container/database versions and results.
+Avoid mocking value objects and simple data structures. Mock external collaborators at unit-test boundaries, not the class under test. Prefer realistic database integration testing when SQL/JPA behavior matters.
+
+Implement the highest-value missing tests first. Run the narrow tests and then the relevant Gradle verification task. Report what risks remain untested.
 ```
 
-**Expected AI output:** Database-realistic integration tests that catch
-mapping and SQL behavior issues.
+**Expected AI output:** A risk-based test suite with fast unit tests and targeted framework/integration coverage.
 
-**Optional follow-up prompts:** -
-`Add a test for the unique/foreign-key constraint failure.` -
-`Capture and review generated SQL for the slowest query.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** An in-memory database can mask dialect, type, and
-constraint differences.
+- `Replace an over-mocked service test with a clearer unit test.`
+- `Add a persistence integration test for the query most likely to regress.`
+
+**Notes or cautions:** Test count is not the objective; protect behavior and framework assumptions.
+
+---
+
+### 34. Replace brittle @SpringBootTest usage
+
+**Purpose:** Replace brittle @SpringBootTest usage.
+
+**When to use it:** When many tests load the entire application context unnecessarily.
+
+**Complete prompt:**
+
+```text
+Audit uses of `@SpringBootTest` in this repository and reduce unnecessary full-context testing.
+
+For each test, determine what behavior it actually needs:
+- plain JUnit unit test;
+- `@WebMvcTest` or equivalent MVC slice;
+- `@DataJpaTest`;
+- focused configuration test;
+- integration test requiring real infrastructure/Testcontainers;
+- genuine full application context.
+
+Do not replace tests mechanically. Preserve coverage of bean wiring and cross-layer behavior where it is intentional.
+
+Propose changes with expected speed/isolation benefit. After approval, convert tests incrementally, run each converted test, then run the complete suite. Include explicit Java imports in any generated code.
+```
+
+**Expected AI output:** A leaner test suite that uses Spring context only where framework behavior is under test.
+
+**Optional follow-up prompts:**
+
+- `Convert the slowest eligible full-context test first.`
+- `Identify the small number of tests that should remain `@SpringBootTest` and explain why.`
+
+**Notes or cautions:** Overusing slices can also miss important wiring; retain deliberate end-to-end context tests.
+
+---
 
 ## Refactoring
 
-### 35. Plan a behavior-preserving Spring Boot refactor
+### 35. Refactor safely with characterization tests
 
-**Purpose:** plan a behavior-preserving Spring Boot refactor.
+**Purpose:** Refactor safely with characterization tests.
 
-**When to use it:** Production code needs restructuring without feature
-changes.
-
-**Complete prompt:**
-
-``` text
-Plan a behavior-preserving refactor of this Spring Boot code.
-
-Code:
-[PASTE OR ATTACH]
-Pain points:
-[DESCRIBE]
-
-Before modifying anything:
-1. Identify current responsibilities and externally observable behavior.
-2. Identify tests that already protect that behavior.
-3. List missing characterization tests needed before refactoring.
-4. Propose small, independently reviewable steps.
-5. Separate structural changes from behavioral changes.
-
-Constraints:
-- Java 21, Spring Boot 3.x.
-- Preserve public API and persistence behavior unless explicitly approved.
-- Prefer constructor injection and explicit dependencies.
-- Do not introduce patterns/interfaces solely for aesthetic purity.
-- Do not rewrite the entire package.
-- Compile and run tests after each step.
-- Stop and report if a step reveals an assumption that tests do not cover.
-
-Return the plan first. Do not edit code until I approve the first step.
-```
-
-**Expected AI output:** A low-risk refactoring sequence protected by
-characterization tests.
-
-**Optional follow-up prompts:** -
-`Implement step 1 only and show the diff rationale.` -
-`After step 1, reassess whether the remaining steps are still justified.`
-
-**Notes / cautions:** Refactoring risk rises sharply when structural and
-behavioral changes are mixed.
-
-### 36. Replace accidental complexity with standard Spring patterns
-
-**Purpose:** replace accidental complexity with standard Spring
-patterns.
-
-**When to use it:** Custom infrastructure may duplicate Spring Boot
-capabilities.
+**When to use it:** When legacy Spring code needs structural improvement but behavior is poorly documented.
 
 **Complete prompt:**
 
-``` text
-Review this custom Spring/Spring Boot infrastructure and determine whether standard framework facilities can replace it.
+```text
+Refactor the selected legacy Spring Boot code without changing externally observable behavior.
 
-Code:
-[PASTE CUSTOM FACTORIES, REGISTRIES, CONFIGURATION, INTERCEPTORS, WRAPPERS]
+Before editing:
+1. Trace current callers and dependencies.
+2. Identify public/API/database behavior that must remain stable.
+3. Add characterization tests around important existing behavior, including awkward edge cases that callers may rely on.
+4. Identify one structural problem to improve first.
 
-For each custom abstraction answer:
-- What problem does it solve?
-- Does Spring Boot 3.x already solve that problem?
-- What behavior would be lost by removing it?
-- Is the custom code easier to test and operate than the standard mechanism?
-- Does it hide lifecycle, transaction, proxy, or configuration behavior?
+Refactor in small, compiling steps. Prefer extracting responsibilities and clarifying names over introducing new frameworks or patterns. Keep constructor injection and existing architectural boundaries unless there is a justified reason to change them.
 
-Do not replace working custom code merely because a Spring annotation exists.
-Recommend removal only when the standard facility is materially simpler and behaviorally equivalent.
-Create characterization tests before replacing infrastructure.
-Make one replacement at a time and run the full test suite.
+After each logical step, run the narrow tests. At the end, run the relevant Gradle test/build tasks and summarize exactly what changed structurally versus behaviorally.
 ```
 
-**Expected AI output:** A measured simplification plan that removes only
-unjustified custom infrastructure.
+**Expected AI output:** A behavior-preserving incremental refactor protected by characterization tests.
 
-**Optional follow-up prompts:** -
-`Replace the highest-value custom abstraction only.` -
-`Document the Spring lifecycle/proxy behavior the replacement relies on.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Framework conventions reduce maintenance only when
-engineers can still reason clearly about runtime behavior.
+- `Refactor the next responsibility while keeping the characterization tests unchanged.`
+- `Now identify behavior that should be deliberately changed in a separate change set.`
+
+**Notes or cautions:** Do not combine broad cleanup with behavior changes unless necessary.
+
+---
+
+### 36. Remove unnecessary Spring abstractions
+
+**Purpose:** Remove unnecessary Spring abstractions.
+
+**When to use it:** When an application contains interfaces, factories, wrappers, or configuration that add indirection without value.
+
+**Complete prompt:**
+
+```text
+Review the selected Spring Boot area for accidental complexity and unnecessary abstraction.
+
+Look for:
+- one-implementation interfaces with no meaningful boundary;
+- pass-through services;
+- repositories wrapped by repositories;
+- factories that only call constructors;
+- configuration classes that merely expose components already discoverable;
+- generic utility layers that obscure domain language;
+- patterns introduced for hypothetical future requirements.
+
+For each candidate, explain whether the abstraction provides a real substitution boundary, infrastructure isolation, test seam, domain concept, or framework integration benefit.
+
+Do not simplify blindly. Produce a prioritized list first. After approval, remove one abstraction at a time, update tests, compile, and verify behavior.
+```
+
+**Expected AI output:** A maintainability-focused simplification plan with evidence for what should stay or go.
+
+**Optional follow-up prompts:**
+
+- `Remove only the highest-confidence redundant abstraction.`
+- `Review whether any tests rely on mocks that exist solely because of unnecessary interfaces.`
+
+**Notes or cautions:** Simplicity means fewer concepts while preserving useful boundaries, not merely fewer files.
+
+---
 
 ## Performance
 
-### 37. Diagnose a slow Spring Boot endpoint
+### 37. Investigate a slow Spring Boot endpoint
 
-**Purpose:** diagnose a slow Spring Boot endpoint.
+**Purpose:** Investigate a slow Spring Boot endpoint.
 
-**When to use it:** An endpoint is slow and needs evidence-based
-analysis.
-
-**Complete prompt:**
-
-``` text
-Diagnose this slow Spring Boot endpoint as a performance engineer. Do not optimize by intuition alone.
-
-Endpoint/use case:
-[DESCRIBE]
-Measurements/traces/logs:
-[PASTE]
-Relevant controller/service/repository/client code:
-[PASTE OR ATTACH]
-
-Build a latency breakdown across:
-- Request parsing/filter chain.
-- Application/service work.
-- Database queries and connection acquisition.
-- External HTTP/messaging calls.
-- Serialization.
-- Thread/connection pool waits.
-- GC/CPU symptoms if evidence exists.
-
-Identify what evidence is missing and suggest the cheapest measurement to obtain it.
-Inspect generated SQL/query count for N+1 and unnecessary data loading.
-Do not recommend caching, async execution, virtual threads, pool increases, or indexes until the bottleneck supports them.
-Rank optimizations by expected impact, risk, and measurement required.
-Implement only the approved highest-value change, then rerun the same measurement and tests.
-```
-
-**Expected AI output:** A measurement-driven latency diagnosis with
-prioritized, verifiable improvements.
-
-**Optional follow-up prompts:** -
-`Instrument the endpoint with Micrometer timers around the suspected bottleneck.` -
-`Review the repository query plan and index coverage.`
-
-**Notes / cautions:** Performance work should compare before/after
-measurements under comparable conditions.
-
-### 38. Review connection and thread pool configuration
-
-**Purpose:** review connection and thread pool configuration.
-
-**When to use it:** A service shows saturation, timeouts, or uncertain
-concurrency tuning.
+**When to use it:** When an endpoint has unacceptable latency or throughput.
 
 **Complete prompt:**
 
-``` text
-Review concurrency-related pool configuration for this Spring Boot 3.x service.
+```text
+Investigate the selected slow endpoint using evidence before proposing optimizations.
 
-Inputs:
-[APPLICATION CONFIG, DEPLOYMENT CPU/MEMORY, TRAFFIC, LATENCY, DB LIMITS, METRICS]
+Trace the request through controller, service, persistence, serialization, and external calls. Use available metrics, logs, profiles, SQL output, query plans, and tests. Separate latency into components where possible.
 
-Evaluate together:
-- HTTP request concurrency.
-- Platform versus virtual thread model if configured.
-- HikariCP maximum pool size and acquisition timeout.
-- Database max connections and replica topology.
-- Outbound HTTP client connection pools/timeouts.
-- Executor pools used by @Async or custom work.
-- Kubernetes replica count/HPA if applicable.
+Check for:
+- N+1 queries and excessive round trips;
+- missing indexes or unbounded queries;
+- unnecessary entity hydration;
+- blocking external calls;
+- repeated serialization/mapping;
+- lock contention or oversized transactions;
+- thread-pool saturation;
+- connection-pool pressure;
+- large payloads;
+- accidental repeated work;
+- inappropriate caching assumptions.
 
-Explain queueing/backpressure interactions; do not tune each pool independently.
-Do not use formulas without stating assumptions.
-Recommend values only where workload data supports them; otherwise specify the measurements needed.
-Highlight configurations that can multiply connections unexpectedly as replicas scale.
-Provide a load-test validation plan before production rollout.
+Do not optimize code based on intuition alone. Produce a ranked bottleneck hypothesis with evidence and a measurement plan. Apply only approved changes one at a time and re-measure after each. Run tests and performance checks appropriate to the repository.
 ```
 
-**Expected AI output:** A system-level pool analysis that prevents local
-tuning from overloading downstream resources.
+**Expected AI output:** A measured bottleneck analysis with incremental optimizations tied to evidence.
 
-**Optional follow-up prompts:** -
-`Calculate database connection demand across the expected replica range.` -
-`Evaluate whether Java 21 virtual threads change the bottleneck in this workload.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Virtual threads reduce thread scarcity; they do
-not create more database connections or downstream capacity.
+- `Instrument the top latency component so we can measure it directly.`
+- `Optimize only the highest-confidence database bottleneck and compare before/after.`
+
+**Notes or cautions:** Do not add caching until the consistency model and invalidation strategy are explicit.
+
+---
+
+### 38. Review JPA performance hazards
+
+**Purpose:** Review JPA performance hazards.
+
+**When to use it:** When persistence behavior may be causing latency, memory, or database load problems.
+
+**Complete prompt:**
+
+```text
+Perform a focused JPA/Hibernate performance review of the selected use cases.
+
+Inspect entity mappings, repository queries, transaction boundaries, DTO mapping, and generated SQL where available.
+
+Evaluate:
+- N+1 selects;
+- EAGER relationships;
+- oversized persistence contexts;
+- unnecessary dirty checking;
+- entity loading for read-only projections;
+- batch insert/update opportunities;
+- join-fetch cardinality explosions;
+- pagination with collection fetch joins;
+- Open Session in View dependence;
+- lazy initialization workarounds;
+- inefficient existence/count patterns.
+
+Do not recommend global fetch-mode changes. Tie every recommendation to a concrete use case and expected SQL behavior.
+
+After approval, implement one optimization at a time, add regression tests, inspect SQL/query counts where practical, and run the build.
+```
+
+**Expected AI output:** A use-case-specific Hibernate performance audit with SQL-aware fixes.
+
+**Optional follow-up prompts:**
+
+- `Eliminate the highest-impact N+1 without changing global fetch types.`
+- `Convert the read-only path to a projection and compare SQL.`
+
+**Notes or cautions:** ORM performance should be reasoned about in terms of generated SQL and cardinality.
+
+---
 
 ## Security
 
 ### 39. Review Spring Security configuration
 
-**Purpose:** review Spring Security configuration.
+**Purpose:** Review Spring Security configuration.
 
-**When to use it:** A resource server or web application needs a focused
-authorization review.
-
-**Complete prompt:**
-
-``` text
-Review this Spring Boot 3.x / Spring Security 6 configuration as a senior application-security engineer.
-
-Security configuration:
-[PASTE]
-Authentication model:
-[OIDC/OAUTH2 RESOURCE SERVER/SESSION/etc.]
-Authorization requirements:
-[PASTE]
-
-Check:
-- Authentication versus authorization responsibilities.
-- Endpoint matcher ordering and unintended permitAll paths.
-- CSRF handling appropriate to the client model.
-- CORS configuration.
-- JWT issuer/audience/signature validation.
-- Scope/authority/role mapping.
-- Method security consistency.
-- Stateless/session configuration.
-- Error handling that leaks details.
-- Actuator and documentation endpoint exposure.
-- Security headers where relevant.
-- Tests for allowed and denied access.
-
-Do not weaken controls to make tests pass.
-Explain every recommended rule in terms of a threat or requirement.
-Provide minimal changes and security-focused MockMvc tests.
-```
-
-**Expected AI output:** A threat-linked Spring Security review with
-explicit authorization tests.
-
-**Optional follow-up prompts:** -
-`Add audience validation for access tokens.` -
-`Create tests proving anonymous, insufficient-scope, and authorized behavior.`
-
-**Notes / cautions:** Authentication success does not imply
-authorization; test both.
-
-### 40. Threat-model a Spring Boot REST endpoint
-
-**Purpose:** threat-model a Spring Boot REST endpoint.
-
-**When to use it:** A sensitive endpoint needs design review before
-implementation.
+**When to use it:** When assessing authentication, authorization, and endpoint protection in a Spring Boot service.
 
 **Complete prompt:**
 
-``` text
-Threat-model this Spring Boot REST operation before code is changed.
+```text
+Review the Spring Security configuration in this Spring Boot 3.x application as a production security engineer.
 
-Operation:
-[DESCRIBE ENDPOINT, ACTOR, DATA, SIDE EFFECTS]
-Trust boundaries/integrations:
-[DESCRIBE]
+Inspect filter chains, authentication mechanism, OAuth2/OIDC resource-server configuration if present, JWT authority mapping, endpoint authorization, method security, CORS, CSRF decisions, session policy, password handling, and test coverage.
 
-Analyze practical threats including:
-- Broken object-level authorization.
-- Broken function-level authorization.
-- Mass assignment.
-- Injection.
-- Replay/idempotency issues.
-- Sensitive-data exposure.
-- Excessive data returned.
-- Abuse/rate concerns.
-- SSRF if user-controlled URLs exist.
-- File/path risks if uploads/downloads exist.
-- Audit requirements.
+Evaluate:
+- default-deny versus accidental permit rules;
+- matcher ordering;
+- role/authority/scope semantics;
+- issuer/audience validation;
+- token claim mapping;
+- public actuator endpoints;
+- CORS breadth;
+- CSRF configuration relative to browser/session behavior;
+- error responses that leak details;
+- security applied only in controllers but bypassable elsewhere.
 
-For each relevant threat provide:
-1. Concrete attack scenario.
-2. Required control and the layer that owns it.
-3. Test that proves the control.
-4. Residual risk.
-
-Do not produce generic OWASP lists unrelated to this endpoint.
-Then review the proposed implementation against the threat model.
+Do not weaken security to make tests pass. Produce prioritized findings first, including exploitability and operational impact. After approval, apply minimal changes and add security tests for allowed and denied cases. Compile and run tests.
 ```
 
-**Expected AI output:** A use-case-specific threat model tied directly
-to controls and executable tests.
+**Expected AI output:** A prioritized security-configuration review with verified authorization behavior.
 
-**Optional follow-up prompts:** -
-`Turn the authorization threats into MockMvc test cases.` -
-`Review DTO fields for mass-assignment exposure.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Security reviews are most useful when each threat
-maps to a concrete control and verification.
+- `Add tests proving the most sensitive endpoint is denied by default.`
+- `Review JWT authority mapping for roles versus OAuth scopes.`
+
+**Notes or cautions:** Authorization rules must be tested negatively as well as positively.
+
+---
+
+### 40. Secure a new REST endpoint
+
+**Purpose:** Secure a new REST endpoint.
+
+**When to use it:** When adding an endpoint that requires authenticated and authorized access.
+
+**Complete prompt:**
+
+```text
+Secure the selected REST endpoint using the authentication/authorization model already established in this repository.
+
+First inspect existing Spring Security configuration and token/authority conventions. Do not invent a second authorization model.
+
+Requirements:
+- identify the exact permission, role, or OAuth scope required and justify it using least privilege;
+- enforce authorization at the appropriate HTTP and/or method boundary;
+- keep business ownership checks in service/domain logic when they depend on resource data;
+- return standard 401/403 behavior without leaking details;
+- do not trust client-supplied identity fields when identity is available from the authenticated principal;
+- add tests for unauthenticated, authenticated-but-forbidden, and authorized requests.
+
+Implement incrementally, compile, and run security/API tests. Explain where each authorization decision is enforced and why.
+```
+
+**Expected AI output:** A least-privilege endpoint security implementation with negative-path tests.
+
+**Optional follow-up prompts:**
+
+- `Add resource-ownership authorization for this operation.`
+- `Verify the endpoint cannot be reached through an alternate route without the same authorization.`
+
+**Notes or cautions:** Authentication proves identity; it does not by itself authorize the operation.
+
+---
 
 ## Production Readiness
 
 ### 41. Perform a production-readiness review
 
-**Purpose:** perform a production-readiness review.
+**Purpose:** Perform a production-readiness review.
 
-**When to use it:** A service is approaching first production
-deployment.
-
-**Complete prompt:**
-
-``` text
-Perform a production-readiness review of this Java 21 / Spring Boot 3.x service.
-
-Inputs:
-[ATTACH REPOSITORY, CONFIG, DEPLOYMENT MANIFESTS, RUNBOOK IF AVAILABLE]
-
-Evaluate only evidence visible in the repository and clearly mark unknowns.
-Cover:
-- Build reproducibility and CI tests.
-- Configuration/secrets.
-- Health, readiness, liveness semantics.
-- Graceful shutdown.
-- Database migrations.
-- Connection/timeouts/retries.
-- Logging, metrics, tracing.
-- Security and Actuator exposure.
-- Resource limits and JVM/container settings.
-- Failure behavior for unavailable dependencies.
-- Backup/recovery assumptions where the service owns data.
-- Deployment/rollback compatibility.
-- Operational runbook gaps.
-
-Return a release-blocker checklist grouped Critical/High/Medium/Low.
-For each blocker include evidence, failure mode, and exact remediation.
-Do not recommend tooling merely because it is fashionable.
-Implement nothing until the blockers are reviewed.
-```
-
-**Expected AI output:** A repository-grounded go-live assessment with
-prioritized blockers and remediation.
-
-**Optional follow-up prompts:** -
-`Convert the Critical/High findings into an implementation sequence.` -
-`Create a minimal operational runbook from the approved architecture.`
-
-**Notes / cautions:** A readiness review should distinguish repository
-evidence from deployment assumptions.
-
-### 42. Design Actuator health and readiness semantics
-
-**Purpose:** design Actuator health and readiness semantics.
-
-**When to use it:** Kubernetes or another orchestrator needs health
-signals that reflect recoverability.
+**When to use it:** Before releasing a Spring Boot service into a production environment.
 
 **Complete prompt:**
 
-``` text
-Design Spring Boot Actuator health semantics for this service.
+```text
+Perform a production-readiness review of this Spring Boot 3.x / Java 21 service.
 
-Dependencies:
-[DATABASE / BROKER / EXTERNAL APIs / CACHE / OTHER]
-Deployment platform:
-[KUBERNETES/ECS/etc.]
+Inspect the repository and deployment artifacts. Evaluate only what is relevant to this service, including:
+- startup and graceful shutdown;
+- liveness/readiness health behavior;
+- database migrations;
+- connection and HTTP client timeouts;
+- retry/backoff policies;
+- thread and connection pools;
+- configuration validation;
+- secret handling;
+- structured/correlated logging;
+- metrics and alertable failure signals;
+- security defaults;
+- resource limits/requests if deployment manifests exist;
+- JVM/container memory settings;
+- idempotency and failure recovery;
+- dependency vulnerability/update process;
+- backup/recovery assumptions where the service owns data.
 
-Define:
-- Liveness: what proves the process must be restarted?
-- Readiness: what conditions mean the instance should stop receiving traffic?
-- Startup behavior if applicable.
-- Which dependencies should NOT make liveness fail.
-- Timeout behavior for custom health indicators.
-- Whether a dependency outage should remove all replicas from service and create an outage loop.
+Do not make changes initially. Produce a severity-ranked checklist: blocker, high, medium, low. For every blocker/high item, cite the relevant code/config and propose the smallest remediation.
 
-Use Spring Boot 3.x Actuator facilities before creating custom indicators.
-Expose only necessary endpoints and details.
-Provide configuration, any required custom indicator code with explicit imports, and tests.
-Explain orchestrator probe settings separately from application health logic.
+After approval, fix items incrementally and run build/tests plus any available deployment validation.
 ```
 
-**Expected AI output:** Correct liveness/readiness semantics that avoid
-restart storms and false availability.
+**Expected AI output:** A repository-specific release readiness assessment rather than a generic checklist.
 
-**Optional follow-up prompts:** -
-`Adapt the probes to the provided Kubernetes Deployment.` -
-`Add a readiness test for database-unavailable behavior.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Liveness should usually detect unrecoverable
-process health, not every downstream dependency outage.
+- `Fix only production blockers and rerun the readiness review.`
+- `Turn the high-severity findings into a release-gate checklist.`
+
+**Notes or cautions:** Do not claim readiness for infrastructure that is not represented or verifiable in the workspace.
+
+---
+
+### 42. Configure graceful shutdown and health semantics
+
+**Purpose:** Configure graceful shutdown and health semantics.
+
+**When to use it:** When a service runs behind an orchestrator/load balancer and must drain safely.
+
+**Complete prompt:**
+
+```text
+Review and implement graceful shutdown plus meaningful liveness/readiness behavior for this Spring Boot service.
+
+Inspect its workload: HTTP requests, scheduled jobs, message consumers, database access, and external clients. Determine what “alive” and “ready” actually mean.
+
+Requirements:
+- readiness should stop new traffic when the service cannot safely serve it;
+- liveness should not depend on every downstream service and cause restart storms;
+- graceful shutdown should allow in-flight work to finish within the platform termination window;
+- long-running consumers/jobs need explicit stop/drain semantics where applicable;
+- health details must not expose sensitive internals publicly;
+- configuration must align with deployment probe timing if manifests are present.
+
+Implement the smallest coherent changes, add tests where feasible, and validate configuration/build. Explain probe semantics and shutdown timing assumptions.
+```
+
+**Expected AI output:** Operationally meaningful health and shutdown behavior aligned with the workload.
+
+**Optional follow-up prompts:**
+
+- `Review Kubernetes probe settings against the application shutdown/startup timings.`
+- `Add a readiness contributor only for the dependency that truly makes the service unable to serve.`
+
+**Notes or cautions:** Do not make liveness depend on transient downstream availability.
+
+---
 
 ## Architecture Reviews
 
-### 43. Review Spring Boot service architecture
+### 43. Review a Spring Boot service architecture
 
-**Purpose:** review Spring Boot service architecture.
+**Purpose:** Review a Spring Boot service architecture.
 
-**When to use it:** A service needs a senior-level architecture
-assessment before major changes.
+**When to use it:** When assessing layering, coupling, boundaries, and maintainability before significant changes.
 
 **Complete prompt:**
 
-``` text
-Review this Spring Boot service as a senior Java architect.
-
-Repository/design:
-[ATTACH OR DESCRIBE]
+```text
+Review this Spring Boot service as a senior Java architect. Do not modify code yet.
 
 Evaluate:
-- Package/module boundaries and dependency direction.
-- Controller/service/repository layering where it adds value.
-- Domain model versus transaction-script style and whether that fits complexity.
-- Transaction boundaries.
-- Persistence coupling and JPA usage.
-- DTO/API boundaries.
-- External integration isolation.
-- Configuration and dependency injection.
-- Test strategy.
-- Failure handling and observability.
-- Security boundaries.
-- Performance risks visible from design.
+- package/module boundaries;
+- controller, service, domain, and persistence responsibilities;
+- dependency direction;
+- transaction boundaries;
+- repository usage;
+- DTO/entity separation;
+- validation placement;
+- exception handling;
+- external integration isolation;
+- security boundaries;
+- test architecture;
+- configuration ownership;
+- performance-sensitive design choices;
+- unnecessary abstractions and framework coupling.
 
-Do not score the code against a pattern checklist.
-Distinguish actual problems from acceptable tradeoffs.
-For every recommendation state: evidence, risk, proposed change, benefit, cost, and what not to change.
-Prioritize the top five changes by engineering value.
-Do not modify code until recommendations are approved.
+Base findings on actual repository evidence. Distinguish:
+1. correctness risks;
+2. maintainability risks;
+3. scalability/operational risks;
+4. stylistic preferences that do not justify churn.
+
+For each material finding, provide evidence, impact, recommended change, rationale, and an incremental migration path. Prioritize the top five changes by value versus risk. Do not recommend a rewrite unless incremental remediation is demonstrably impractical.
 ```
 
-**Expected AI output:** A pragmatic architecture review focused on
-high-value changes rather than pattern compliance.
+**Expected AI output:** A repository-grounded architecture assessment with prioritized, incremental recommendations.
 
-**Optional follow-up prompts:** -
-`Turn the top recommendation into a sequence of small pull requests.` -
-`Identify which current design choices should explicitly remain unchanged.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Architecture review quality depends as much on
-rejecting unnecessary change as proposing change.
+- `Create an implementation plan for only the top two architecture findings.`
+- `Challenge the review: identify recommendations that may not justify their migration cost.`
 
-### 44. Evaluate whether to split a Spring Boot service
+**Notes or cautions:** Architecture review should distinguish real risks from personal style preferences.
 
-**Purpose:** evaluate whether to split a Spring Boot service.
+---
 
-**When to use it:** A service may be too broad, but a microservice split
-has significant cost.
+### 44. Evaluate modularization options
+
+**Purpose:** Evaluate modularization options.
+
+**When to use it:** When a Spring Boot codebase is becoming difficult to navigate or change safely.
 
 **Complete prompt:**
 
-``` text
-Evaluate whether this Spring Boot application should remain one deployable service or be split.
+```text
+Evaluate whether the current Spring Boot application would benefit from stronger modular boundaries.
 
-Current responsibilities:
-[DESCRIBE]
-Data ownership:
-[DESCRIBE]
-Team/deployment constraints:
-[DESCRIBE]
-Pain points:
-[DESCRIBE]
+Inspect package dependencies, feature ownership, shared code, transaction boundaries, database ownership, and test structure. Consider options in increasing cost:
+- clearer package-by-feature boundaries;
+- package visibility and dependency rules;
+- Spring Modulith-style modularization if compatible and justified;
+- Gradle multi-project modules;
+- service extraction only where independent deployment provides real value.
 
-Analyze:
-- Cohesion and change coupling.
-- Transactional consistency needs.
-- Independent scaling/deployment evidence.
-- Data ownership boundaries.
-- Failure isolation.
-- Team ownership.
-- Operational complexity introduced by a split.
-- API/event contracts and migration sequencing.
+Do not assume microservices are the answer. Identify the actual coupling problems first.
 
-Do not recommend microservices merely because the codebase is large.
-Consider a modular monolith/package boundary as an explicit alternative.
-If a split is justified, identify one candidate boundary and a strangler-style migration plan that preserves behavior.
-Include rollback and data-migration risks.
+Return a recommended target with rationale, dependency rules, migration sequence, and risks. Prefer the least expensive structure that creates enforceable boundaries. Do not modify code until the target is approved.
 ```
 
-**Expected AI output:** A cost-aware service-boundary decision with a
-modular alternative and incremental migration path.
+**Expected AI output:** A cost-aware modularization recommendation tied to concrete coupling problems.
 
-**Optional follow-up prompts:** -
-`Design module boundaries before considering a deployment split.` -
-`Define the data ownership and API contract for the candidate extracted service.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** A distributed system should be introduced only
-when its operational cost buys a concrete capability.
+- `Design the first module boundary and its allowed dependencies.`
+- `Identify shared code that would undermine the proposed module boundaries.`
+
+**Notes or cautions:** Deployment boundaries are much more expensive than code/module boundaries.
+
+---
 
 ## Code Reviews
 
-### 45. Perform a senior Spring Boot pull-request review
+### 45. Perform a senior Spring Boot code review
 
-**Purpose:** perform a senior Spring Boot pull-request review.
+**Purpose:** Perform a senior Spring Boot code review.
 
-**When to use it:** A PR needs a rigorous, actionable review.
-
-**Complete prompt:**
-
-``` text
-Review this Spring Boot pull request as a senior Java engineer.
-
-Diff/context:
-[PASTE DIFF OR ATTACH CHANGED FILES]
-Intended behavior:
-[DESCRIBE]
-
-Review for:
-- Correctness and edge cases.
-- Java 21 idioms without cleverness.
-- Spring Boot/Spring lifecycle and proxy behavior.
-- Constructor injection and dependency design.
-- Transaction boundaries.
-- JPA/query behavior.
-- API compatibility.
-- Validation and exception handling.
-- Security.
-- Concurrency/thread safety.
-- Performance regressions.
-- Test quality and missing tests.
-- Operational/configuration impact.
-
-Only report issues that are actionable and supported by the code.
-Classify as Blocker, Major, Minor, or Question.
-For each issue cite the relevant code, explain the failure scenario, and propose the smallest fix.
-Do not rewrite unrelated code or flood the review with style preferences.
-```
-
-**Expected AI output:** A concise, severity-ranked PR review tied to
-concrete failure scenarios.
-
-**Optional follow-up prompts:** -
-`Review only the transaction and JPA implications in more depth.` -
-`Propose tests that would reproduce each Blocker/Major issue.`
-
-**Notes / cautions:** High-signal reviews prioritize correctness and
-maintainability over personal style.
-
-### 46. Review AI-generated Spring Boot code before merge
-
-**Purpose:** review AI-generated Spring Boot code before merge.
-
-**When to use it:** Code generated by an AI assistant needs verification
-for plausible-but-wrong framework usage.
+**When to use it:** When reviewing a pull request or selected change set before merge.
 
 **Complete prompt:**
 
-``` text
-Audit this AI-generated Spring Boot 3.x code before it is merged.
+```text
+Review the current Spring Boot change set as a senior Java reviewer. Do not rewrite code wholesale.
 
-Generated code:
-[PASTE OR ATTACH]
-Requested behavior:
-[PASTE ORIGINAL REQUIREMENT]
+Prioritize findings that affect:
+- correctness;
+- transaction semantics;
+- concurrency;
+- security;
+- API compatibility;
+- persistence/query behavior;
+- error handling;
+- observability;
+- test quality;
+- maintainability.
 
-Assume the code may be syntactically plausible but semantically wrong.
-Verify:
-- Imports/APIs actually exist for Spring Boot 3.x and Java 21.
-- Dependency requirements are present in Gradle.
-- Annotations have the intended runtime effect.
-- Proxy limitations such as self-invocation.
-- JPA ownership/fetch/cascade semantics.
-- Transaction rollback behavior.
-- Security defaults.
-- Serialization and validation.
-- Null/error paths.
-- Tests assert behavior rather than merely execute code.
+Use Java 21 and Spring Boot 3.x expectations, but respect established repository conventions. Flag constructor-injection deviations, Jakarta compatibility issues, unnecessary dependencies, entity exposure, or framework misuse only when they materially matter.
 
-Compile and run tests rather than claiming the code works.
-Add the smallest missing tests that can falsify risky assumptions.
-Return verified issues and exact evidence; do not speculate when a quick build/test can decide.
+For each finding provide:
+- severity;
+- exact file/location;
+- why it matters;
+- a concrete minimal fix;
+- whether a test should be added or changed.
+
+Also call out strong decisions worth preserving. Do not manufacture issues to fill a quota. End with a merge recommendation: approve, approve with minor changes, or request changes.
 ```
 
-**Expected AI output:** A verification-oriented review that catches
-hallucinated APIs and framework semantic errors.
+**Expected AI output:** A concise, severity-ranked review focused on production impact and actionable fixes.
 
-**Optional follow-up prompts:** -
-`Run dependencyInsight for any newly introduced library.` -
-`Add a regression test for the riskiest framework assumption.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** AI-generated framework code should be treated like
-an untrusted patch until compiled and behaviorally tested.
+- `Review only the tests in this change set for false confidence or missing failure cases.`
+- `Re-review after the fixes and report only unresolved issues.`
+
+**Notes or cautions:** Do not turn subjective formatting preferences into blocking review comments.
+
+---
+
+### 46. Review a persistence-heavy change
+
+**Purpose:** Review a persistence-heavy change.
+
+**When to use it:** When a pull request modifies JPA entities, repositories, migrations, or transactional behavior.
+
+**Complete prompt:**
+
+```text
+Perform a persistence-focused review of the current change set.
+
+Inspect entity mappings, repositories, migrations, service transaction boundaries, and tests together. Check:
+- schema/entity mismatch;
+- nullable/unique/foreign-key constraint consistency;
+- cascade/orphan semantics;
+- fetch behavior and N+1 risk;
+- query cardinality and pagination;
+- optimistic/pessimistic locking;
+- migration safety for existing data;
+- transaction rollback behavior;
+- backward compatibility during rolling deployment;
+- indexes required by new access patterns;
+- tests against realistic database behavior.
+
+For each issue, state severity, evidence, likely runtime symptom, and minimal remediation. Do not suggest EAGER fetching as a generic performance fix. Conclude whether the database/application change is safe for production rollout.
+```
+
+**Expected AI output:** A production-oriented persistence review spanning code, schema, and rollout behavior.
+
+**Optional follow-up prompts:**
+
+- `Assess whether this migration is safe during a rolling deployment.`
+- `Inspect the new query for index support and cardinality risk.`
+
+**Notes or cautions:** Database changes must be reviewed as deployment changes, not just code changes.
+
+---
 
 ## Debugging
 
 ### 47. Debug a Spring Boot startup failure
 
-**Purpose:** debug a Spring Boot startup failure.
+**Purpose:** Debug a Spring Boot startup failure.
 
-**When to use it:** The application fails during context initialization.
-
-**Complete prompt:**
-
-``` text
-Diagnose this Spring Boot 3.x startup failure from evidence, not generic guesses.
-
-Startup log/stack trace:
-[PASTE FULL RELEVANT TRACE]
-Recent changes:
-[DESCRIBE]
-Configuration/build files:
-[PASTE IF RELEVANT]
-
-Work from the deepest meaningful cause outward.
-Determine whether the failure is primarily:
-- Configuration binding.
-- Bean creation/dependency cycle.
-- Missing/ambiguous bean.
-- Classpath/dependency incompatibility.
-- Database/migration.
-- Security configuration.
-- Port/network/resource.
-- Application code.
-
-Explain the bean/configuration chain that leads to the failure.
-Identify one minimal experiment or change that proves the diagnosis.
-Do not suggest deleting caches or rebuilding everything unless evidence supports it.
-After the fix, run the application/tests and verify the original failure is gone.
-```
-
-**Expected AI output:** A root-cause startup diagnosis with a
-falsifiable minimal fix.
-
-**Optional follow-up prompts:** -
-`Explain why Spring attempted to create the failing bean.` -
-`Add a context-load test that prevents this regression.`
-
-**Notes / cautions:** The first exception line is often not the root
-cause; follow nested causes carefully.
-
-### 48. Debug an intermittent production error
-
-**Purpose:** debug an intermittent production error.
-
-**When to use it:** A Spring Boot service fails only under certain
-production conditions.
+**When to use it:** When the application context fails to start.
 
 **Complete prompt:**
 
-``` text
-Investigate this intermittent Spring Boot production failure.
+```text
+Diagnose the current Spring Boot startup failure from the available code, configuration, and stack trace/logs.
 
-Symptoms:
-[ERRORS, FREQUENCY, IMPACT]
-Logs/traces/metrics:
-[PASTE]
-Relevant code:
-[PASTE]
-Environment/deployment:
-[DESCRIBE]
+Work from the first meaningful root cause rather than the final wrapper exception. Trace nested `Caused by` chains and identify:
+- the bean/configuration that actually failed;
+- whether the cause is missing configuration, dependency mismatch, bean ambiguity/cycle, validation failure, database connectivity, migration failure, or classpath incompatibility;
+- why Spring attempted to create that component;
+- the smallest fix that preserves intended behavior.
 
-Build competing hypotheses covering only evidence-supported areas such as concurrency, pool exhaustion, timeouts, retries, stale data, transaction isolation, external dependency behavior, or resource pressure.
-For each hypothesis provide:
-- Evidence for and against.
-- Additional telemetry/query needed.
-- A safe reproduction or load-test strategy.
-- A discriminating test that would rule it in or out.
+Do not disable validation, exclude auto-configuration, or make beans optional merely to get startup to succeed unless that is architecturally correct.
 
-Do not make code changes until the likely cause is narrowed.
-Avoid increasing timeouts/pools as a first response.
-Once evidence identifies the cause, propose the smallest remediation and a regression/soak test.
+Apply the minimal fix if the evidence is sufficient. Then rerun the failing startup/test task and the relevant tests. Report root cause, fix, and how the failure can be prevented.
 ```
 
-**Expected AI output:** A hypothesis-driven incident analysis that
-narrows intermittent failures before changing production code.
+**Expected AI output:** A root-cause startup diagnosis with a minimal verified correction.
 
-**Optional follow-up prompts:** -
-`Design the telemetry needed to distinguish the top two hypotheses.` -
-`Create a targeted concurrency/load test for the leading hypothesis.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Intermittent failures are easy to mask with
-retries or larger pools; prove the bottleneck first.
+- `Explain the bean-creation chain that led to this failure.`
+- `Add a focused context/configuration test that catches this earlier.`
+
+**Notes or cautions:** Spring's outer exception is often only a wrapper; find the deepest relevant cause.
+
+---
+
+### 48. Debug an intermittent production-style failure
+
+**Purpose:** Debug an intermittent production-style failure.
+
+**When to use it:** When a bug is timing-, load-, data-, or environment-dependent and not immediately reproducible.
+
+**Complete prompt:**
+
+```text
+Investigate the intermittent failure in this Spring Boot service without guessing.
+
+Build an evidence matrix from available logs, metrics, traces, tests, and code. Identify variables that correlate with failure: request shape, data state, concurrency, instance, dependency latency, transaction timing, pool usage, retries, or deployment version.
+
+Create ranked hypotheses and, for each, specify:
+- evidence supporting it;
+- evidence against it;
+- instrumentation or test needed to confirm/refute it;
+- safest short-term mitigation if production impact is high.
+
+Add targeted diagnostic instrumentation or a deterministic reproduction test where possible. Do not add broad retries or exception swallowing as a substitute for diagnosis. Make code changes only after a hypothesis is supported, then run regression tests.
+```
+
+**Expected AI output:** A hypothesis-driven investigation that improves observability and avoids speculative fixes.
+
+**Optional follow-up prompts:**
+
+- `Build a deterministic concurrency test for the leading hypothesis.`
+- `Add temporary low-volume instrumentation needed to distinguish the top two hypotheses.`
+
+**Notes or cautions:** Intermittent failures often become harder to diagnose when broad retries hide the original signal.
+
+---
 
 ## Build Failures
 
-### 49. Diagnose a compile failure after a Spring Boot upgrade
+### 49. Diagnose a compile failure after a change
 
-**Purpose:** diagnose a compile failure after a Spring Boot upgrade.
+**Purpose:** Diagnose a compile failure after a change.
 
-**When to use it:** A framework or Java upgrade breaks compilation.
-
-**Complete prompt:**
-
-``` text
-Diagnose these compilation failures after upgrading to Java 21 / Spring Boot 3.x.
-
-Build output:
-[PASTE COMPLETE RELEVANT ERRORS]
-Old/new versions:
-[PASTE]
-Changed build files:
-[PASTE]
-
-Group errors by root cause rather than fixing files one by one.
-Check:
-- javax.* to jakarta.* namespace changes.
-- Removed/deprecated Spring APIs.
-- Security 6 configuration changes.
-- Hibernate/JPA API changes.
-- Annotation processor compatibility.
-- Test API changes.
-- Dependency version mismatches.
-
-For each root cause identify the official replacement concept and the smallest migration.
-Do not suppress deprecation/errors with unsafe casts or exclusions.
-Apply one root-cause fix at a time, rerun ./gradlew clean test, and use the new error set to guide the next step.
-Report final build/test status.
-```
-
-**Expected AI output:** A root-cause-oriented upgrade repair that avoids
-whack-a-mole compilation fixes.
-
-**Optional follow-up prompts:** -
-`Handle only the Jakarta namespace failures first.` -
-`After compilation succeeds, review runtime migration risks not caught by the compiler.`
-
-**Notes / cautions:** Compiler success after an upgrade does not prove
-behavioral compatibility; follow with focused integration tests.
-
-### 50. Diagnose a test that passes locally but fails in CI
-
-**Purpose:** diagnose a test that passes locally but fails in CI.
-
-**When to use it:** A Spring Boot test is environment-dependent or
-flaky.
+**When to use it:** When a Java/Spring/Gradle change breaks compilation.
 
 **Complete prompt:**
 
-``` text
-Diagnose why this Spring Boot/Gradle test passes locally but fails in CI.
+```text
+Diagnose and fix the current Gradle compile failure with the smallest correct change.
 
-CI failure:
-[PASTE LOG]
-Test/code:
-[PASTE]
-Local and CI environment differences:
-[PASTE JAVA/GRADLE/OS/DB/TIMEZONE/LOCALE/PARALLELISM IF KNOWN]
+Run the failing compile task and start with the first causally relevant compiler error. Determine whether the issue is:
+- Java type/signature mismatch;
+- missing or wrong import;
+- generated-source/annotation-processor failure;
+- dependency scope/version issue;
+- Java 21 language/toolchain mismatch;
+- Jakarta versus javax API mismatch;
+- stale code after an API refactor.
 
-Investigate deterministic causes first:
-- Test ordering/shared state.
-- Timezone/locale/clock assumptions.
-- Port/file-system/path assumptions.
-- Parallel execution.
-- External network dependency.
-- Database engine/version.
-- Missing environment variables.
-- Race conditions/timeouts.
-- Gradle daemon/cache differences.
+Do not apply unrelated cleanup. Fix one root cause at a time and rerun the narrow compile task after each change. Once compilation succeeds, run the relevant tests and then `./gradlew build` if practical.
 
-Do not solve flakiness by adding sleeps or retries unless retry behavior is itself under test.
-Create a local reproduction strategy matching CI.
-Fix the underlying isolation/assumption and run the failing test repeatedly plus the full suite.
+Report the root cause, files changed, commands run, and whether any remaining warnings deserve action.
 ```
 
-**Expected AI output:** A reproducible CI-failure diagnosis and
-deterministic test fix.
+**Expected AI output:** A minimal compile fix verified by Gradle and followed by relevant tests.
 
-**Optional follow-up prompts:** -
-`Make the test independent of system time using an injected Clock.` -
-`Run the test repeatedly with Gradle parallel execution enabled.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Flaky tests are production signals when they
-expose hidden timing or shared-state assumptions.
+- `Explain why the compiler error appeared at this location even if the root cause was elsewhere.`
+- `Check whether generated sources or annotation processors are involved.`
+
+**Notes or cautions:** Fix the first root cause before chasing cascaded compiler errors.
+
+---
+
+### 50. Diagnose CI-only Gradle failures
+
+**Purpose:** Diagnose CI-only Gradle failures.
+
+**When to use it:** When the build passes locally but fails in CI.
+
+**Complete prompt:**
+
+```text
+Investigate why this Spring Boot Gradle build fails in CI but succeeds locally.
+
+Compare repository-controlled and environment-specific inputs:
+- JDK vendor/version and Java toolchain;
+- Gradle wrapper usage;
+- OS/filesystem case sensitivity;
+- locale/timezone;
+- environment variables and secrets;
+- network/repository access;
+- test parallelism;
+- Docker/Testcontainers availability;
+- cached Gradle state;
+- generated files accidentally present locally;
+- working-directory assumptions;
+- file permissions.
+
+Use CI configuration and logs in the workspace as evidence. Do not “fix” CI by skipping tests or making failures non-fatal.
+
+Reproduce the CI command/environment as closely as possible, identify the smallest deterministic difference, fix it in repository-controlled configuration where appropriate, and rerun relevant tasks. Document any required CI environment contract.
+```
+
+**Expected AI output:** A reproducible explanation for the local/CI difference and a durable fix.
+
+**Optional follow-up prompts:**
+
+- `Make the local build use the same Java toolchain as CI.`
+- `Identify files or generated artifacts that are present locally but absent from a clean checkout.`
+
+**Notes or cautions:** CI-only failures often expose hidden environmental assumptions that should be removed.
+
+---
 
 ## Deployment
 
-### 51. Create a production Dockerfile for Spring Boot
+### 51. Review containerization for Spring Boot
 
-**Purpose:** create a production Dockerfile for Spring Boot.
+**Purpose:** Review containerization for Spring Boot.
 
-**When to use it:** A service needs a container image suitable for
-production deployment.
-
-**Complete prompt:**
-
-``` text
-Create/review a production Dockerfile for this Java 21 / Spring Boot 3.x Gradle service.
-
-Repository/build:
-[ATTACH OR DESCRIBE]
-Runtime platform:
-[KUBERNETES/ECS/etc.]
-
-Requirements:
-- Use a supported Java 21 runtime image appropriate to organizational policy.
-- Build artifact in CI or use a justified multi-stage build; explain the choice.
-- Run as a non-root user.
-- Keep image contents minimal without obscure tricks.
-- Preserve container signal handling and graceful Spring shutdown.
-- Do not bake secrets or environment-specific config into the image.
-- Expose/document the application port without assuming EXPOSE publishes it.
-- Set JVM/container options only when justified.
-- Include a .dockerignore.
-- Make image reproducible and scan-friendly.
-
-Build the image, run it, exercise the health endpoint, and run the project tests where tooling permits.
-Explain each non-obvious Docker decision.
-```
-
-**Expected AI output:** A maintainable, non-root Spring Boot image with
-verified startup/health behavior.
-
-**Optional follow-up prompts:** -
-`Add OCI labels and a version/build metadata strategy.` -
-`Review JVM memory behavior against the container memory limit.`
-
-**Notes / cautions:** Do not over-optimize image layers at the cost of
-clarity and reproducibility.
-
-### 52. Review Kubernetes deployment settings for Spring Boot
-
-**Purpose:** review Kubernetes deployment settings for Spring Boot.
-
-**When to use it:** A Spring Boot workload is being deployed to
-Kubernetes/EKS.
+**When to use it:** When preparing or reviewing a Docker image for a Java 21 Spring Boot service.
 
 **Complete prompt:**
 
-``` text
-Review this Kubernetes Deployment/Service configuration for a Spring Boot 3.x application.
+```text
+Review the container build for this Java 21 / Spring Boot 3.x service.
 
-Manifests/Helm values:
-[PASTE OR ATTACH]
-Application health/config:
-[PASTE]
-Traffic/resource information:
-[DESCRIBE]
+Inspect Dockerfiles, Gradle tasks, CI image build, runtime user, base image, JVM options, and deployment manifests.
 
 Evaluate:
-- Container port and Service targetPort consistency.
-- Readiness/liveness/startup probes and Actuator semantics.
-- CPU/memory requests and limits.
-- JVM memory behavior under the limit.
-- Graceful termination, preStop if needed, and terminationGracePeriodSeconds.
-- Rolling update settings and capacity during deployment.
-- ConfigMap/Secret injection.
-- Service account/IAM permissions.
-- HPA assumptions.
-- Pod disruption and availability needs.
-- Database connection multiplication as replicas scale.
+- reproducible build/runtime images;
+- JDK versus JRE/runtime requirements;
+- non-root execution;
+- image size without sacrificing maintainability;
+- layer caching;
+- correct artifact selection;
+- JVM container-awareness and memory headroom;
+- writable filesystem assumptions;
+- signal handling and graceful shutdown;
+- health checks versus orchestrator probes;
+- secret injection;
+- exposed ports and environment configuration;
+- image provenance/version pinning appropriate to project policy.
 
-Do not invent resource numbers without workload data.
-Separate application changes from platform-manifest changes.
-Return release blockers first, then a minimal patch.
-Validate manifests and run application tests after code changes.
+Do not optimize image size at the expense of opaque build complexity. Produce prioritized findings first. Apply approved changes and verify the image/build/startup path where the environment permits.
 ```
 
-**Expected AI output:** A Spring-aware Kubernetes deployment review that
-connects probe, shutdown, resource, and scaling behavior.
+**Expected AI output:** A production-focused container review with pragmatic, verified improvements.
 
-**Optional follow-up prompts:** -
-`Calculate connection-pool demand at maximum HPA replicas.` -
-`Review rolling-update settings for zero-downtime compatibility.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Application and orchestrator settings form one
-runtime system; review them together.
+- `Refactor the Dockerfile for better dependency-layer caching.`
+- `Review JVM memory settings against the container memory limit.`
+
+**Notes or cautions:** Container image concerns and Kubernetes deployment concerns overlap but are not identical.
+
+---
+
+### 52. Review Kubernetes deployment for Spring Boot
+
+**Purpose:** Review Kubernetes deployment for Spring Boot.
+
+**When to use it:** When deploying a Spring Boot service to Kubernetes/EKS.
+
+**Complete prompt:**
+
+```text
+Review the Kubernetes deployment artifacts for this Spring Boot service and align them with application behavior.
+
+Inspect Deployment, Service, Ingress, ConfigMaps/Secrets references, autoscaling, probes, resource settings, and rollout strategy.
+
+Evaluate:
+- readiness/liveness/startup probes;
+- graceful termination and `terminationGracePeriodSeconds`;
+- CPU/memory requests and limits;
+- JVM memory headroom;
+- replica count and disruption behavior;
+- HPA metrics and whether the application can scale horizontally;
+- session/state assumptions;
+- configuration and secret injection;
+- rolling-update safety;
+- database migration coordination;
+- service/ingress ports;
+- security context;
+- observability labels/metadata.
+
+Do not invent resource numbers without workload evidence. Mark values that require measurement. Recommend application and manifest changes together when they are coupled. Validate manifests with available tooling and run application tests for code changes.
+```
+
+**Expected AI output:** A workload-aware Kubernetes deployment review with explicit measurement gaps.
+
+**Optional follow-up prompts:**
+
+- `Check whether graceful shutdown fits the current pod termination window.`
+- `Review HPA assumptions for blocking I/O and database connection limits.`
+
+**Notes or cautions:** Scaling pods does not automatically scale downstream database capacity.
+
+---
 
 ## General Best Practices
 
-### 53. Establish Spring Boot engineering conventions for a repository
+### 53. Modernize Spring Boot code without a rewrite
 
-**Purpose:** establish Spring Boot engineering conventions for a
-repository.
+**Purpose:** Modernize Spring Boot code without a rewrite.
 
-**When to use it:** A team needs concise, enforceable conventions for
-ongoing AI-assisted development.
+**When to use it:** When a mature codebase needs targeted modernization to Java 21/Spring Boot 3.x practices.
 
 **Complete prompt:**
 
-``` text
-Create a repository-specific Spring Boot engineering conventions document from the codebase, not a generic style guide.
+```text
+Identify high-value modernization opportunities in this Spring Boot 3.x / Java 21 repository without proposing a broad rewrite.
 
-Repository:
-[ATTACH]
-Known constraints:
-- Java 21.
-- Spring Boot 3.x.
-- Gradle.
-- Jakarta Persistence where JPA is used.
-- Constructor injection.
-- Maintainability over cleverness.
+Look for changes that materially improve correctness or maintainability, such as:
+- constructor injection replacing field injection;
+- Java 21 language features where they make code clearer;
+- records for appropriate immutable DTO/configuration models;
+- Jakarta API consistency;
+- type-safe configuration;
+- improved transaction boundaries;
+- focused tests replacing brittle context-heavy tests;
+- removal of obsolete Spring patterns;
+- clearer HTTP/error contracts;
+- dependency simplification.
 
-Infer existing good conventions before proposing new ones.
-Cover only conventions that materially improve consistency:
-- Package/module boundaries.
-- Dependency injection.
-- DTO/entity separation.
-- Transaction placement.
-- Repository/query practices.
-- Validation.
-- Exception/error handling.
-- Testing levels.
-- Configuration.
-- Logging/observability.
-- Security.
-- Build/dependency management.
+Do not change code initially. Rank opportunities by benefit, risk, and migration cost. Exclude cosmetic churn and clever language features that reduce team readability.
 
-For each convention include rationale and one short good/bad example where useful.
-Avoid rules that are merely personal formatting preferences or already enforced automatically.
-Mark proposed changes that would require team agreement.
+After approval, implement one modernization at a time, compile, run tests, and report behavior impact.
 ```
 
-**Expected AI output:** A concise, repository-grounded engineering
-standard suitable for CONTRIBUTING.md or AI instructions.
+**Expected AI output:** A prioritized modernization backlog emphasizing maintainability and low-risk value.
 
-**Optional follow-up prompts:** -
-`Convert the approved conventions into a CODE_REVIEW_CHECKLIST.md.` -
-`Create concise instructions for Codex/AI agents from these conventions.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Standards should reduce recurring decisions; too
-many low-value rules make important rules invisible.
+- `Apply the safest three modernization changes only.`
+- `Identify Java 21 features that would *not* improve this codebase and explain why.`
 
-### 54. Perform a maintainability-first final review
+**Notes or cautions:** Modernization should reduce future maintenance cost, not merely make code look newer.
 
-**Purpose:** perform a maintainability-first final review.
+---
 
-**When to use it:** A feature is complete and needs a final holistic
-review before merge.
+### 54. Enforce architectural conventions with tests
+
+**Purpose:** Enforce architectural conventions with tests.
+
+**When to use it:** When important Spring Boot design rules are repeatedly violated in reviews.
 
 **Complete prompt:**
 
-``` text
-Perform a final maintainability-first review of this completed Spring Boot feature.
+```text
+Identify architectural conventions in this repository that are important enough to enforce automatically, then add lightweight architecture tests for the approved rules.
 
-Requirement:
-[PASTE]
-Changed code/diff:
-[PASTE OR ATTACH]
+Inspect the current package/module structure and recurring review concerns. Candidate rules may include:
+- controllers must not access repositories directly;
+- domain packages must not depend on web/infrastructure packages;
+- JPA entities must not be exposed from controller methods;
+- constructor injection is required;
+- package boundaries must follow approved dependencies.
 
-Verify:
-- The implementation satisfies the requirement without unrelated scope.
-- Names and responsibilities are clear.
-- Dependencies flow in understandable directions.
-- Spring/JPA/transaction semantics are correct.
-- API and persistence contracts are intentional.
-- Error and validation paths are covered.
-- Security assumptions are explicit.
-- Performance risks are proportional to expected workload.
-- Tests protect behavior and important integration points.
-- Configuration/operations changes are documented.
-- No speculative abstractions, dead code, or unnecessary dependencies were introduced.
+Do not encode subjective style preferences or rules the current architecture cannot satisfy without major migration. Propose a small initial rule set and show current violations before enforcement.
 
-Compile and run all relevant tests.
-Return only:
-1. Merge blockers.
-2. Important non-blocking improvements.
-3. Things that are deliberately good enough and should not be changed.
-4. Build/test evidence.
-Do not propose a rewrite if the feature is already maintainable.
+After approval, implement architecture tests using the project's existing test stack or a justified minimal dependency. Make violations actionable. Run the tests and full build.
 ```
 
-**Expected AI output:** A high-signal pre-merge assessment that includes
-an explicit 'do not change' category.
+**Expected AI output:** A small set of enforceable architectural guardrails with actionable failures.
 
-**Optional follow-up prompts:** -
-`Fix only the merge blockers and rerun tests.` -
-`Produce a concise PR description explaining architectural decisions and verification.`
+**Optional follow-up prompts:**
 
-**Notes / cautions:** Good engineering review includes recognizing when
-further refactoring has negative return.
+- `Add only the controller-to-repository dependency rule first.`
+- `Create a migration plan for existing violations before making the rule blocking.`
+
+**Notes or cautions:** Architecture tests are valuable only for stable, agreed boundaries.
+
+---
